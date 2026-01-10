@@ -1,0 +1,85 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>WordWand – Child Home</title>
+    <link rel="stylesheet" href="{% static 'css/child.css' %}">
+    <script src="{% static 'js/child.js' %}"></script>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="topbar">
+        <div class="logo">Word<span>Wand</span></div>
+        <nav>
+            <a href="#" class="nav-link">Home</a>
+            <a href="#" class="nav-link">Courses</a>
+            <a href="#" class="nav-link">Stories</a>
+            <a href="#" class="nav-link">Games</a>
+        </nav>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-left">
+            <h1>
+                We are making<br>
+                <span>Learning Fun</span>
+            </h1>
+            <p>Hello 👋 Let’s learn some new words today!</p>
+
+            <div class="hero-buttons">
+                <button class="btn blue speak" data-text="Start Learning">Start Learning</button>
+                <button class="btn orange speak" data-text="Read a Story">Read a Story</button>
+            </div>
+
+            <div class="stats">
+                <div><b>40</b><span>Words</span></div>
+                <div><b>16</b><span>Games</span></div>
+                <div><b>4</b><span>Stories</span></div>
+            </div>
+        </div>
+
+        <div class="hero-right">
+            <div class="circle">
+                <img src="{% static 'images/kid.png' %}" class="hero-kid" alt="kid">
+            </div>
+        </div>
+    </section>
+
+    <!-- Learning Cards -->
+    <section class="cards">
+        <div class="card speak" data-text="Learn Letters">
+            <h3>ABC Letters</h3>
+            <p>Tap to hear and see letters.</p>
+        </div>
+
+        <div class="card yellow speak" data-text="Play Word Games">
+            <h3>Word Games</h3>
+            <p>Fun games to practice spelling.</p>
+        </div>
+
+        <div class="card green speak" data-text="Listen and Read">
+            <h3>Read & Listen</h3>
+            <p>Words read aloud with highlight.</p>
+        </div>
+
+        <div class="card purple speak" data-text="Talk to your Helper">
+            <h3>AI Helper</h3>
+            <p>Speak and get friendly replies.</p>
+        </div>
+    </section>
+
+    <!-- Mascot -->
+    <section class="mascot">
+        <img src="{% static 'images/mascot.png' %}" id="mascot" alt="mascot">
+        <p id="mascot-text">Click me to talk 😊</p>
+    </section>
+
+    <script src="{% static 'js/child.js' %}"></script>
+</body>
+
+</html>
