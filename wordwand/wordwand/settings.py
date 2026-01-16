@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 """
 
+import pytesseract
 from pathlib import Path
 import os
 from dotenv import load_dotenv
@@ -128,3 +129,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
+
+
+pytesseract.pytesseract.tesseract_cmd = r"C:\Users\mr_e_\AppData\Local\Programs\Tesseract-OCR\tesseract.exe"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
