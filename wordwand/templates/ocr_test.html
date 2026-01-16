@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordWand – Read & Listen</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        h2 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-family: 'Comic Sans MS', cursive;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-section {
+            background: #e8f4fc;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 2px dashed #3498db;
+        }
+
+        .upload-form {
+            text-align: center;
+        }
+
+        .upload-form input[type="file"] {
+            padding: 10px;
+            background: white;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 400px;
+            margin: 10px auto;
+            cursor: pointer;
+        }
+
+        .upload-form button[type="submit"] {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .upload-form button[type="submit"]:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .error-message {
+            background: #ffe6e6;
+            color: #d63031;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #d63031;
+        }
+
+        .text-display-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 30px 0;
+            border: 1px solid #ddd;
+        }
+
+        #text-container {
+            font-size: 22px;
+            line-height: 1.8;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            min-height: 150px;
+            margin-bottom: 20px;
+            font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
+        }
+
+        .hard-word {
+            background: #ffeaa7 !important;
+            border: 2px solid #fdcb6e !important;
+            border-radius: 8px !important;
+            padding: 6px 12px !important;
+            margin: 3px !important;
+            cursor: pointer !important;
+            font-weight: bold !important;
+            transition: all 0.3s ease !important;
+            display: inline-block !important;
+        }
+
+        .hard-word:hover {
+            background: #fdcc6e !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .control-panel {
+            background: #e3f2fd;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .control-panel h3 {
+            color: #1565c0;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .control-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            min-width: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .control-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-resume {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+
+        .btn-slow {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .btn-keywords {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+        }
+
+        .keywords-section {
+            background: #fff9e6;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 30px 0;
+            border: 2px solid #ffeaa7;
+        }
+
+        .keywords-section h3 {
+            color: #d35400;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+            text-align: center;
+        }
+
+        .keywords-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .keyword-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 3px solid #ffeaa7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 180px;
+        }
+
+        .keyword-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            border-color: #fdcb6e;
+        }
+
+        .keyword-word {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-family: 'Comic Sans MS', cursive;
+        }
+
+        .keyword-syllables {
+            font-size: 18px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+            font-family: 'Arial', sans-serif;
+            letter-spacing: 1px;
+            line-height: 1.4;
+        }
+
+        .keyword-hint {
+            font-size: 12px;
+            color: #95a5a6;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+
+        .keyword-play-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            width: 80%;
+            margin-top: auto;
+        }
+
+        .keyword-play-btn:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .audio-section {
+            background: #e8f6f3;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .audio-section h3 {
+            color: #16a085;
+            margin-bottom: 15px;
+        }
+
+        audio {
+            width: 100%;
+            max-width: 500px;
+            margin: 10px 0;
+        }
+
+        .download-link {
+            display: inline-block;
+            background: #16a085;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .download-link:hover {
+            background: #138d75;
+            transform: translateY(-2px);
+        }
+
+        .highlighted {
+            background: #4CAF50 !important;
+            color: white !important;
+            transform: scale(1.05) !important;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4) !important;
+            border-color: #388E3C !important;
+            z-index: 10 !important;
+            position: relative !important;
+        }
+
+        .reading-word {
+            background: #2196F3 !important;
+            color: white !important;
+            transform: scale(1.03) !important;
+            box-shadow: 0 3px 10px rgba(33, 150, 243, 0.3) !important;
+            border-color: #1976D2 !important;
+            z-index: 5 !important;
+            position: relative !important;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h2 {
+                font-size: 1.8em;
+            }
+
+            .control-buttons {
+                flex-direction: column;
+            }
+
+            .control-btn {
+                width: 100%;
+            }
+
+            .keywords-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            #text-container {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>📚 WordWand – Read & Listen 📚</h2>
+
+        <!-- File Upload Section -->
+        <div class="upload-section">
+            <form method="POST" enctype="multipart/form-data" class="upload-form">
+                {% csrf_token %}
+                <h3>Upload your text/image/PDF:</h3>
+                <input type="file" name="file" required accept=".png,.jpg,.jpeg,.bmp,.tiff,.pdf,.txt">
+                <br>
+                <button type="submit">📁 Read File</button>
+            </form>
+        </div>
+
+        <!-- Error Message -->
+        {% if error %}
+        <div class="error-message">
+            ⚠️ {{ error }}
+        </div>
+        {% endif %}
+
+        <!-- Results Section (Only shown when text exists) -->
+        {% if text %}
+
+        <!-- Text Display Section -->
+        <div class="text-display-section">
+            <h3 style="color: #2c3e50; margin-bottom: 15px;">📖 Detected Text:</h3>
+            <div id="text-container"></div>
+        </div>
+
+        <!-- Reading Controls -->
+        <div class="control-panel">
+            <h3>🔊 Reading Controls</h3>
+            <div class="control-buttons">
+                <button onclick="readNormal()" class="control-btn btn-resume">
+                    ▶ Resume Reading
+                </button>
+                <button onclick="readSlow()" class="control-btn btn-slow">
+                    🐢 Slow Reading
+                </button>
+                <button onclick="stopSpeech()" class="control-btn btn-stop">
+                    ⏹ Stop Reading
+                </button>
+                <button onclick="showKeywords()" class="control-btn btn-keywords">
+                    📋 Practice Keywords
+                </button>
+            </div>
+        </div>
+
+        <!-- Keywords Practice Section (Initially Hidden) -->
+        <div id="keywords-section" class="keywords-section" style="display: none;">
+            <h3>🔤 Keywords Practice</h3>
+            <p style="text-align: center; color: #7f8c8d; margin-bottom: 20px;">
+                Click on any word to hear its pronunciation. Words are split into syllables for easier reading.
+            </p>
+
+            <div id="keywords-container" class="keywords-grid">
+                <!-- Keywords will be inserted here by JavaScript -->
+            </div>
+
+            <div class="control-buttons">
+                <button onclick="readAllKeywords()" class="control-btn btn-resume">
+                    🔊 Read All Keywords
+                </button>
+                <button onclick="readKeywordsSlow()" class="control-btn btn-slow">
+                    🐢 Read Slow
+                </button>
+                <button onclick="stopKeywords()" class="control-btn btn-stop">
+                    ⏹ Stop Keywords
+                </button>
+                <button onclick="hideKeywords()" class="control-btn btn-back">
+                    ← Back to Full Text
+                </button>
+            </div>
+        </div>
+
+
+        <!-- JavaScript -->
+        <script>
+            // ========== GLOBAL VARIABLES ==========
+            let wordElements = [];
+            let keywordElements = [];
+            let isSpeaking = false;
+            let isSpeakingKeywords = false;
+            let hardWords = [];
+            let syllables = {};
+            let keywordsList = [];
+            let readingInterval = null;
+            let currentWordIndex = 0;
+
+            // ========== INITIALIZATION ==========
+            document.addEventListener('DOMContentLoaded', function () {
+                const text = `{{ text|escapejs }}`;
+                const words = text.split(/\s+/);
+
+                hardWords = JSON.parse('{{ hard_words|escapejs }}');
+                syllables = JSON.parse('{{ syllables|escapejs }}');
+
+                // Get unique hard words for keywords
+                keywordsList = Object.keys(syllables).sort();
+
+                const container = document.getElementById("text-container");
+                container.innerHTML = "";
+                wordElements = [];
+
+                // Display full text with hard words highlighted
+                words.forEach((word, index) => {
+                    const clean = word.toLowerCase().replace(/[^\w\s]/g, "");
+
+                    if (word.trim() === "") {
+                        container.append(" ");
+                        return;
+                    }
+
+                    let element;
+
+                    if (hardWords.includes(clean)) {
+                        // Create highlighted button for hard words
+                        element = document.createElement("span");
+                        element.innerText = word;
+                        element.className = "hard-word";
+                        element.style.cssText = `
+                            margin: 3px;
+                            background: #ffeaa7;
+                            border: 2px solid #fdcb6e;
+                            border-radius: 8px;
+                            padding: 6px 12px;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            font-weight: bold;
+                            display: inline-block;
+                        `;
+
+                        element.onclick = () => {
+                            speakSingleWord(word);
+                        };
+                    } else {
+                        // Create regular text span
+                        element = document.createElement("span");
+                        element.innerText = word;
+                        element.style.cssText = `
+                            margin: 0 2px;
+                            padding: 2px 4px;
+                            transition: all 0.3s ease;
+                            display: inline-block;
+                        `;
+                    }
+
+                    element.dataset.index = index;
+                    element.dataset.word = word;
+                    element.dataset.clean = clean;
+                    wordElements.push(element);
+                    container.appendChild(element);
+
+                    // Add space after word (except for punctuation)
+                    if (!/[.,!?;:]$/.test(word)) {
+                        container.append(" ");
+                    }
+                });
+
+                // Initialize keywords display
+                initializeKeywords();
+            });
+
+            // ========== KEYWORDS FUNCTIONS ==========
+            function initializeKeywords() {
+                const container = document.getElementById("keywords-container");
+                container.innerHTML = "";
+                keywordElements = [];
+
+                keywordsList.forEach((keyword, index) => {
+                    const keywordDiv = document.createElement("div");
+                    keywordDiv.className = "keyword-card";
+
+                    // Display the word
+                    const wordDisplay = document.createElement("div");
+                    wordDisplay.className = "keyword-word";
+                    wordDisplay.textContent = keyword;
+
+                    // Display syllables
+                    const syllableDisplay = document.createElement("div");
+                    syllableDisplay.className = "keyword-syllables";
+                    syllableDisplay.textContent = syllables[keyword] || keyword;
+
+                    // Hint text
+                    const hint = document.createElement("div");
+                    hint.className = "keyword-hint";
+                    hint.textContent = "Click to hear pronunciation";
+
+                    // Play button
+                    const playBtn = document.createElement("button");
+                    playBtn.className = "keyword-play-btn";
+                    playBtn.textContent = "🔊 Listen";
+
+                    playBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        speakKeyword(keyword, index);
+                    };
+
+                    // Add click event to the whole card
+                    keywordDiv.onclick = () => {
+                        speakKeyword(keyword, index);
+                    };
+
+                    keywordDiv.appendChild(wordDisplay);
+                    keywordDiv.appendChild(syllableDisplay);
+                    keywordDiv.appendChild(hint);
+                    keywordDiv.appendChild(playBtn);
+                    container.appendChild(keywordDiv);
+
+                    keywordElements.push(keywordDiv);
+                });
+            }
+
+            function speakKeyword(keyword, index) {
+                if (isSpeakingKeywords) {
+                    window.speechSynthesis.cancel();
+                    resetKeywordHighlights();
+                }
+
+                const utterance = new SpeechSynthesisUtterance(keyword);
+                utterance.rate = 0.8;
+                utterance.pitch = 1;
+
+                utterance.onstart = () => {
+                    isSpeakingKeywords = true;
+                    resetKeywordHighlights();
+                    if (keywordElements[index]) {
+                        keywordElements[index].classList.add('highlighted');
+                    }
+                };
+
+                utterance.onend = () => {
+                    isSpeakingKeywords = false;
+                    setTimeout(() => {
+                        if (keywordElements[index]) {
+                            keywordElements[index].classList.remove('highlighted');
+                        }
+                    }, 500);
+                };
+
+                utterance.onerror = () => {
+                    isSpeakingKeywords = false;
+                    resetKeywordHighlights();
+                };
+
+                window.speechSynthesis.speak(utterance);
+            }
+
+            async function readAllKeywords(rate = 0.8) {
+                if (isSpeakingKeywords) {
+                    stopKeywords();
+                    return;
+                }
+
+                isSpeakingKeywords = true;
+                resetKeywordHighlights();
+
+                for (let i = 0; i < keywordsList.length; i++) {
+                    if (!isSpeakingKeywords) break;
+
+                    const keyword = keywordsList[i];
+
+                    // Highlight current keyword
+                    if (keywordElements[i]) {
+                        keywordElements[i].classList.add('highlighted');
+
+                        // Scroll into view
+                        keywordElements[i].scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                    }
+
+                    // Speak the keyword
+                    await speakWordPromise(keyword, rate);
+
+                    // Unhighlight after delay
+                    await delay(500);
+
+                    if (keywordElements[i]) {
+                        keywordElements[i].classList.remove('highlighted');
+                    }
+
+                    // Pause between keywords
+                    await delay(300);
+                }
+
+                isSpeakingKeywords = false;
+            }
+
+            function readKeywordsSlow() {
+                readAllKeywords(0.6);
+            }
+
+            function stopKeywords() {
+                window.speechSynthesis.cancel();
+                isSpeakingKeywords = false;
+                resetKeywordHighlights();
+            }
+
+            function resetKeywordHighlights() {
+                keywordElements.forEach(element => {
+                    element.classList.remove('highlighted');
+                });
+            }
+
+            // ========== TEXT READING WITH PERFECT HIGHLIGHTING ==========
+            function speakSingleWord(word) {
+                if (isSpeaking) {
+                    window.speechSynthesis.cancel();
+                    resetTextHighlight();
+                }
+
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.rate = 0.8;
+                utterance.pitch = 1;
+
+                utterance.onstart = function () {
+                    isSpeaking = true;
+                    const wordElement = wordElements.find(el =>
+                        el.dataset.word === word || el.innerText === word
+                    );
+                    if (wordElement) {
+                        resetTextHighlight();
+                        wordElement.classList.add('highlighted');
+                    }
+                };
+
+                utterance.onend = function () {
+                    isSpeaking = false;
+                    setTimeout(resetTextHighlight, 300);
+                };
+
+                window.speechSynthesis.speak(utterance);
+            }
+
+            // WORD-BY-WORD READING WITH PERFECT SYNC
+            async function readTextWordByWord(rate = 1) {
+                if (isSpeaking) {
+                    stopSpeech();
+                    return;
+                }
+
+                isSpeaking = true;
+                resetTextHighlight();
+                currentWordIndex = 0;
+
+                // Filter out empty elements
+                const wordsToRead = wordElements.filter(el => el.innerText.trim() !== "");
+
+                for (let i = 0; i < wordsToRead.length; i++) {
+                    if (!isSpeaking) break;
+
+                    const element = wordsToRead[i];
+                    const word = element.innerText.trim();
+
+                    if (!word) continue;
+
+                    // Remove previous highlights
+                    resetTextHighlight();
+
+                    // Highlight current word
+                    element.classList.add('reading-word');
+
+                    // Scroll into view if not visible
+                    const elementRect = element.getBoundingClientRect();
+                    const containerRect = document.getElementById('text-container').getBoundingClientRect();
+
+                    if (elementRect.bottom > containerRect.bottom || elementRect.top < containerRect.top) {
+                        element.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center',
+                            inline: 'nearest'
+                        });
+                    }
+
+                    // Speak the word
+                    await speakWordPromise(word, rate);
+
+                    // Remove highlight and add completion highlight
+                    element.classList.remove('reading-word');
+                    element.classList.add('highlighted');
+
+                    // Pause between words (longer for punctuation)
+                    const hasPunctuation = /[.!?,;:]$/.test(word);
+                    await delay(hasPunctuation ? 600 : 200);
+
+                    // Remove completion highlight
+                    element.classList.remove('highlighted');
+                }
+
+                isSpeaking = false;
+            }
+
+            // PHRASE READING FOR BETTER FLOW
+            async function readTextByPhrases(rate = 1) {
+                if (isSpeaking) {
+                    stopSpeech();
+                    return;
+                }
+
+                isSpeaking = true;
+                resetTextHighlight();
+
+                // Group words into phrases
+                const phrases = [];
+                let currentPhrase = [];
+
+                wordElements.forEach((element, index) => {
+                    const word = element.innerText.trim();
+                    if (!word) return;
+
+                    currentPhrase.push({
+                        element: element,
+                        word: word
+                    });
+
+                    // Break at punctuation or every 5 words
+                    if (/[.!?;:]$/.test(word) || currentPhrase.length >= 5) {
+                        if (currentPhrase.length > 0) {
+                            phrases.push([...currentPhrase]);
+                            currentPhrase = [];
+                        }
+                    }
+                });
+
+                // Add remaining words
+                if (currentPhrase.length > 0) {
+                    phrases.push(currentPhrase);
+                }
+
+                // Read phrase by phrase
+                for (let i = 0; i < phrases.length; i++) {
+                    if (!isSpeaking) break;
+
+                    const phrase = phrases[i];
+
+                    // Highlight all words in the phrase
+                    phrase.forEach(item => {
+                        item.element.classList.add('reading-word');
+                    });
+
+                    // Scroll first word into view
+                    if (phrase[0]) {
+                        phrase[0].element.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center',
+                            inline: 'nearest'
+                        });
+                    }
+
+                    // Create phrase text
+                    const phraseText = phrase.map(item => item.word).join(' ');
+
+                    // Speak the phrase
+                    await speakWordPromise(phraseText, rate);
+
+                    // Remove reading highlights, add completion highlights
+                    phrase.forEach(item => {
+                        item.element.classList.remove('reading-word');
+                        item.element.classList.add('highlighted');
+                    });
+
+                    // Pause between phrases
+                    if (i < phrases.length - 1) {
+                        await delay(400);
+                    }
+
+                    // Remove completion highlights
+                    phrase.forEach(item => {
+                        item.element.classList.remove('highlighted');
+                    });
+                }
+
+                isSpeaking = false;
+            }
+
+            function resetTextHighlight() {
+                wordElements.forEach(element => {
+                    element.classList.remove('highlighted');
+                    element.classList.remove('reading-word');
+                });
+            }
+
+            // ========== CONTROL FUNCTIONS ==========
+            function readNormal() {
+                // Smart selection: word-by-word for short texts, phrase reading for longer
+                const wordCount = wordElements.filter(el => el.innerText.trim() !== "").length;
+
+                if (wordCount <= 15) {
+                    readTextWordByWord(1);
+                } else {
+                    readTextByPhrases(1);
+                }
+            }
+
+            function readSlow() {
+                const wordCount = wordElements.filter(el => el.innerText.trim() !== "").length;
+
+                if (wordCount <= 15) {
+                    readTextWordByWord(0.7);
+                } else {
+                    readTextByPhrases(0.7);
+                }
+            }
+
+            function stopSpeech() {
+                window.speechSynthesis.cancel();
+                isSpeaking = false;
+                clearInterval(readingInterval);
+                resetTextHighlight();
+                currentWordIndex = 0;
+            }
+
+            // ========== VIEW CONTROL FUNCTIONS ==========
+            function showKeywords() {
+                // Stop any ongoing speech
+                stopSpeech();
+                stopKeywords();
+
+                // Hide text container, show keywords
+                document.querySelector('.text-display-section').style.display = 'none';
+                document.querySelector('.control-panel').style.display = 'none';
+
+                // Show keywords section
+                document.getElementById('keywords-section').style.display = 'block';
+
+                // Scroll to keywords
+                document.getElementById('keywords-section').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
+
+            function hideKeywords() {
+                // Stop keywords speech
+                stopKeywords();
+
+                // Show text container, hide keywords
+                document.querySelector('.text-display-section').style.display = 'block';
+                document.querySelector('.control-panel').style.display = 'block';
+
+                // Hide keywords section
+                document.getElementById('keywords-section').style.display = 'none';
+
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            // ========== HELPER FUNCTIONS ==========
+            function speakWordPromise(word, rate) {
+                return new Promise((resolve) => {
+                    const utterance = new SpeechSynthesisUtterance(word);
+                    utterance.rate = rate;
+                    utterance.pitch = 1;
+                    utterance.onend = resolve;
+                    utterance.onerror = resolve;
+                    window.speechSynthesis.speak(utterance);
+                });
+            }
+
+            function delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            // ========== KEYBOARD SHORTCUTS ==========
+            document.addEventListener('keydown', function (e) {
+                // Space to play/pause
+                if (e.code === 'Space' && !e.target.matches('input, textarea')) {
+                    e.preventDefault();
+                    if (isSpeaking) {
+                        stopSpeech();
+                    } else {
+                        readNormal();
+                    }
+                }
+
+                // Escape to stop
+                if (e.code === 'Escape') {
+                    stopSpeech();
+                    stopKeywords();
+                }
+
+                // 'K' to show keywords
+                if (e.code === 'KeyK' && e.ctrlKey) {
+                    e.preventDefault();
+                    showKeywords();
+                }
+
+                // 'B' to go back to text
+                if (e.code === 'KeyB' && e.ctrlKey) {
+                    e.preventDefault();
+                    hideKeywords();
+                }
+            });
+
+            // Speech synthesis voices detection
+            function loadVoices() {
+                const voices = window.speechSynthesis.getVoices();
+                if (voices.length > 0) {
+                    // Try to find a clear voice for children
+                    const preferredVoice = voices.find(voice =>
+                        voice.name.includes('Google UK English Female') ||
+                        voice.name.includes('Microsoft Zira') ||
+                        voice.name.includes('Female') ||
+                        voice.lang === 'en-US'
+                    );
+
+                    if (preferredVoice) {
+                        // Set as default
+                        SpeechSynthesisUtterance.prototype.voice = preferredVoice;
+                    }
+                }
+            }
+
+            // Load voices when available
+            if ('speechSynthesis' in window) {
+                loadVoices();
+                window.speechSynthesis.onvoiceschanged = loadVoices;
+            }
+        </script>
+
+        {% endif %}
+    </div>
+</body>
+
+</html>
