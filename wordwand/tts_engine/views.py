@@ -222,7 +222,7 @@ def clean_text(text):
     return text.strip()
 
 
-def ocr_test(request):
+def reader(request):
     text = ""
     error = ""
     audio_url = ""
@@ -348,4 +348,4 @@ def ocr_test(request):
         "syllables": json.dumps(word_syllables, ensure_ascii=False)
     }
 
-    return render(request, "ocr_test.html", context)
+    return render(request, "reader.html", context)

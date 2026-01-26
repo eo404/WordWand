@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import ocr_test
+from . import views
 
 urlpatterns = [
-    path("ocr-test/", ocr_test),
+    path("reader/", views.reader, name="reader"),
 ]
