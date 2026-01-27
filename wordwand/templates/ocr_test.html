@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>WordWand – Read & Listen</title>
+
+    <!-- OCR page styles -->
+    <link rel="stylesheet" href="{% static 'css/tts_engine.css' %}">
+
+</head>
+
+<body>
+    <div class="container">
+
+        <h2>📚 WordWand – Read & Listen 📚</h2>
+
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="file" name="file" required>
+                <button type="submit">📁 Read File</button>
+            </form>
+        </div>
+
+        {% if error %}
+        <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+        {% if text %}
+        <!-- Detected Text -->
+        <div class="text-display-section">
+            <h3>📖 Detected Text</h3>
+            <div id="text-container"></div>
+        </div>
+
+        <!-- Controls -->
+        <div class="control-panel">
+            <button onclick="readNormal()">▶ Read</button>
+            <button onclick="readSlow()">🐢 Slow</button>
+            <button onclick="stopSpeech()">⏹ Stop</button>
+        </div>
+
+        <!-- Keywords Section -->
+        <div id="keywords-section" style="display:none;">
+            <h3>🔤 Keywords Practice</h3>
+            <div id="keywords-container"></div>
+            <button onclick="hideKeywords()">← Back</button>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Data from Django -->
+    <script>
+        const OCR_TEXT = `{{ text|escapejs }}`;
+        const HARD_WORDS = JSON.parse('{{ hard_words|escapejs }}');
+        const SYLLABLES = JSON.parse('{{ syllables|escapejs }}');
+    </script>
+
+    <!-- OCR page logic -->
+    <script src="{% static 'js/tts_engine.js' %}"></script>
+
+<!-- Hard Word Popup -->
+<div id="word-popup" class="popup hidden">
+    <div class="popup-content">
+        <span class="close-btn" onclick="closePopup()">✖</span>
+        <h2 id="popup-word"></h2>
+        <div id="letter-box"></div>
+        <button onclick="speakPopupWord()">🔊 Hear Again</button>
+    </div>
+</div>
+
+</body>
+
+</html>
