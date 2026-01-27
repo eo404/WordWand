@@ -1,0 +1,90 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>WordWand – Read & Listen</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{% static 'css/tts_engine.css' %}">
+</head>
+
+<body>
+    <div class="container">
+
+        <h2>📚 WordWand – Read & Listen 📚</h2>
+
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="file" name="file" required>
+                <button type="submit">📁 Read File</button>
+            </form>
+        </div>
+
+        {% if error %}
+        <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+        {% if text %}
+        <!-- Detected Text -->
+        <div class="text-display-section">
+            <h3>📖 Detected Text</h3>
+
+            <!-- IMPORTANT: This container MUST be empty (JS fills it) -->
+            <div id="text-container"></div>
+        </div>
+
+        <!-- Controls -->
+        <div class="control-panel">
+            <button onclick="readNormal()">▶ Read</button>
+            <button onclick="readSlow()">🐢 Slow</button>
+            <button onclick="stopSpeech()">⏹ Stop</button>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- ============================= -->
+    <!-- PASS DJANGO DATA TO JAVASCRIPT -->
+    <!-- ============================= -->
+    <script>
+        const OCR_TEXT = "{{ text|escapejs }}";
+        const HARD_WORDS = JSON.parse('{{ hard_words|escapejs|default:"[]" }}');
+        const SYLLABLES = JSON.parse('{{ syllables|escapejs|default:"{}" }}');
+
+        console.log("OCR_TEXT:", OCR_TEXT);
+        console.log("HARD_WORDS:", HARD_WORDS);
+        console.log("SYLLABLES:", SYLLABLES);
+    </script>
+
+    <!-- ============================= -->
+    <!-- HARD WORD POPUP -->
+    <!-- ============================= -->
+    <div id="word-popup" class="popup hidden">
+        <div class="popup-content" onclick="event.stopPropagation();">
+
+            <!-- Close Button -->
+            <span class="close-btn" onclick="closePopup()">✖</span>
+
+            <!-- Word Title -->
+            <h2 id="popup-word" style="margin-bottom: 15px;"></h2>
+
+            <!-- Syllables Area -->
+            <div id="letter-box"></div>
+
+            <!-- Buttons -->
+            <div style="margin-top: 20px;">
+                <button onclick="speakPopupWord()">🔊 Hear Again</button>
+                <button onclick="closePopup()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/tts_engine.js' %}"></script>
+
+</body>
+
+</html>
