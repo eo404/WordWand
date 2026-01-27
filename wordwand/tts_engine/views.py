@@ -222,7 +222,7 @@ def clean_text(text):
     return text.strip()
 
 
-def ocr_test(request):
+def reader(request):
     text = ""
     error = ""
     audio_url = ""
@@ -237,7 +237,7 @@ def ocr_test(request):
         # Validate file size
         if uploaded_file.size > 10 * 1024 * 1024:
             error = "File size too large. Maximum size is 10MB."
-            return render(request, "ocr_test.html", {"error": error})
+            return render(request, "reader.html", {"error": error})
 
         # Create media directory
         media_dir = settings.MEDIA_ROOT
@@ -260,7 +260,7 @@ def ocr_test(request):
             if file_ext not in supported_extensions:
                 error = f"Unsupported file type. Supported types: {', '.join(supported_extensions)}"
                 os.remove(file_path)
-                return render(request, "ocr_test.html", {"error": error})
+                return render(request, "reader.html", {"error": error})
 
             # Extract text
             text = extract_text_from_file(file_path, file_ext)
@@ -268,7 +268,7 @@ def ocr_test(request):
             if not text or len(text.strip()) < 10:
                 error = "No readable text found. Please try a different file."
                 os.remove(file_path)
-                return render(request, "ocr_test.html", {"error": error})
+                return render(request, "reader.html", {"error": error})
 
             # Clean text
             text = clean_text(text)
@@ -348,4 +348,4 @@ def ocr_test(request):
         "syllables": json.dumps(word_syllables, ensure_ascii=False)
     }
 
-    return render(request, "ocr_test.html", context)
+    return render(request, "reader.html", context)
