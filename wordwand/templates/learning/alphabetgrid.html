@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>WordWand – Alphabet Grid</title>
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/alphabetgrid.css' %}">
+</head>
+
+<body>
+
+    <div class="scene">
+
+        <!-- CHALKBOARD -->
+        <div class="board">
+            <h1>Choose a Letter</h1>
+
+            <!-- Alphabet Grid -->
+            <div class="alphabet-grid">
+                {% for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+                <button class="letter-btn" data-letter="{{ letter }}">
+                    {{ letter }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    <audio id="clickSound" src="{% static 'sounds/click.mp3' %}"></audio>
+    <script src="{% static 'js/alphabetgrid.js' %}"></script>
+
+</body>
+
+</html>

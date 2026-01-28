@@ -52,20 +52,22 @@
 
     <!-- Learning Cards -->
     <section class="cards">
-        <div class="card speak" data-text="Learn Letters">
+        <a href="{% url 'letters_intro' %}" style="text-decoration:none;" class="card speak">
             <h3>ABC Letters</h3>
             <p>Tap to hear and see letters.</p>
-        </div>
+        </a>
 
         <div class="card yellow speak" data-text="Play Word Games">
             <h3>Word Games</h3>
             <p>Fun games to practice spelling.</p>
         </div>
 
-        <div class="card green speak" data-text="Listen and Read">
-            <h3>Read & Listen</h3>
-            <p>Words read aloud with highlight.</p>
-        </div>
+        <a href="{% url 'reader' %}" style="text-decoration:none;">
+            <div class="card green speak" data-text="Listen and Read">
+                <h3>Read & Listen</h3>
+                <p>Words read aloud with highlight.</p>
+            </div>
+        </a>
 
         <div class="card purple speak" data-text="Talk to your Helper">
             <h3>AI Helper</h3>

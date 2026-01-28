@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>WordWand – Letters</title>
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/letters_intro.css' %}">
+</head>
+
+<body>
+
+    <div class="scene">
+
+        <!-- BUNTING -->
+        <img src="{% static 'images/banner.png' %}" alt="Alphabet Bunting" class="bunting" />
+
+        <!-- TEACHER CHARACTER -->
+        <img src="{% static 'images/teacher.png' %}" alt="Teacher Character" class="teacher" />
+
+
+        <!-- BLACKBOARD -->
+        <div class="board">
+            <h1>LETTERS</h1>
+            <button id="startBtn" class="start-btn" data-next-url="{% url 'alphabet_grid' %}">
+                START!
+            </button>
+        </div>
+
+    </div>
+
+    <audio id="whoosh" src="{% static 'sounds/whoosh.mp3' %}"></audio>
+    <script src="{% static 'js/letters_intro.js' %}"></script>
+
+</body>
+
+</html>
