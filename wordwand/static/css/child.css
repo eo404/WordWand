@@ -144,14 +144,196 @@ body {
 .purple {
     background: #f3dfff;
 }
+/* ================================
+   SKY BACKGROUND (CODE GENERATED)
+================================ */
 
-/* Mascot */
-.mascot {
-    text-align: center;
-    margin: 40px;
+.sky-bg {
+    position: fixed;
+    inset: 0;
+    background: #5a5db3; /* blue-purple */
+    z-index: -1;
+    overflow: hidden;
 }
 
-#mascot {
-    width: 160px;
-    cursor: pointer;
+
+/* ---------------- Stars ---------------- */
+
+.star {
+    position: absolute;
+    font-size: 26px;
+    animation: twinkle 3s infinite ease-in-out;
+}
+
+.s1 { top: 10%; left: 15%; }
+.s2 { top: 20%; right: 20%; }
+.s3 { bottom: 30%; left: 25%; }
+.s4 { top: 60%; right: 15%; }
+
+@keyframes twinkle {
+    0% { opacity: 0.3; }
+    50% { opacity: 1; }
+    100% { opacity: 0.3; }
+}
+
+
+/* ---------------- Clouds ---------------- */
+
+.cloud {
+    position: absolute;
+    width: 140px;
+    height: 60px;
+    background: white;
+    border-radius: 50px;
+    opacity: 0.9;
+}
+
+/* Cloud bumps */
+.cloud::before,
+.cloud::after {
+    content: "";
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+}
+
+.cloud::before {
+    width: 60px;
+    height: 60px;
+    top: -25px;
+    left: 20px;
+}
+
+.cloud::after {
+    width: 80px;
+    height: 80px;
+    top: -35px;
+    right: 15px;
+}
+
+
+/* Cloud positions + movement */
+
+.c1 {
+    top: 35%;
+    left: -150px;
+    animation: cloudMove 30s linear infinite;
+}
+
+.c2 {
+    top: 55%;
+    left: -200px;
+    animation: cloudMove 40s linear infinite;
+}
+
+.c3 {
+    top: 25%;
+    left: -180px;
+    animation: cloudMove 35s linear infinite;
+}
+
+
+@keyframes cloudMove {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(130vw);
+    }
+}
+
+.hero, .cards, .navbar {
+    position: relative;
+    z-index: 5;
+}
+
+/* ================================
+   PILL NAVBAR STYLE
+================================ */
+
+.pill-navbar {
+    width: 100%;
+    background: #7ff0a3; /* light green */
+
+    padding: 14px 40px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    border-radius: 0 0 20px 20px;
+}
+
+/* Sections */
+.nav-left,
+.nav-right {
+    display: flex;
+    gap: 15px;
+}
+
+.nav-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+
+/* Pills */
+.pill {
+    padding: 8px 22px;
+
+    border-radius: 30px;
+
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;
+
+    color: #004d40;
+
+    border: 2px solid #004d40;
+
+    transition: all 0.25s ease;
+}
+
+/* Colors */
+.pink {
+    background: #ffc7f3;
+}
+
+.light-pink {
+    background: #ffd9df;
+}
+
+.green {
+    background: #9affc4;
+}
+
+.blue {
+    background: #b6f6ff;
+}
+
+/* Hover Effect */
+.pill:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+
+/* Center Logo */
+.logo-circle {
+    width: 48px;
+    height: 48px;
+
+    border-radius: 50%;
+
+    background: #7ff0a3;
+
+    border: 2px solid #004d40;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 20px;
+    color: #004d40;
 }

@@ -131,7 +131,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\Users\mr_e_\AppData\Local\Programs\Tesseract-OCR\tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
