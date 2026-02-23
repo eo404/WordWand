@@ -1,0 +1,30 @@
+{% extends "user_authentication/base_auth.html" %}
+
+{% block title %}Verify Email - WordWand{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">Verify Email</h2>
+        
+        <p class="text-center text-muted mb-4">
+            A verification link has been sent to your email address.<br>
+            Please check your inbox and click the link to activate your account.
+        </p>
+        
+        <div class="alert alert-info">
+            <strong>Didn't receive the email?</strong>
+            <ul class="mb-0">
+                <li>Check your spam or junk folder</li>
+                <li>Verify that you entered the correct email address</li>
+                <li>Try registering again with a different email</li>
+            </ul>
+        </div>
+        
+        <div class="form-link">
+            <p><a href="{% url 'register' %}">Back to registration</a></p>
+            <p><a href="{% url 'login' %}">Already verified? Login here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
