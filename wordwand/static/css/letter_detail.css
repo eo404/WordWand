@@ -110,9 +110,13 @@ canvas {
     transform: scale(1.05);
 }
 
-.sound-text {
+.board .sound-text {
     color: #ffd54f;
     font-size: 18px;
     font-weight: 600;
     margin-bottom: 20px;
+}
+
+.board .sound-text {
+    color: #ffd54f !important;
 }
