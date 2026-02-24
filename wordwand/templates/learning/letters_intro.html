@@ -1,7 +1,18 @@
 {% extends "base.html" %}
 {% load static %}
 
+<<<<<<< HEAD
 {% block content %}
+=======
+<head>
+    <meta charset="UTF-8" />
+
+    <!-- Viewport meta tag with zoom lock -->
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+
+    <title>WordWand – Letters</title>
+>>>>>>> 727bc8a7067b249aa5aec146e97719d6b34abeda
 
 <div class="main-board" style="text-align:center">
 
@@ -15,4 +26,31 @@
 
 </div>
 
+<<<<<<< HEAD
 {% endblock %}
+=======
+
+        <!-- BLACKBOARD -->
+        <div class="board">
+
+            <img src="{% static 'images/banner.png' %}" alt="Alphabet Bunting" class="bunting" />
+
+            <h1>LETTERS</h1>
+
+            <button id="startBtn" class="start-btn" data-next-url="{% url 'alphabetgrid' %}">
+                START!
+            </button>
+
+            <!-- TEACHER CHARACTER -->
+            <img src="{% static 'images/teacher.png' %}" alt="Teacher Character" class="teacher" />
+
+        </div>
+
+    </div>
+
+    <script src="{% static 'js/letters_intro.js' %}"></script>
+
+</body>
+
+</html>
+>>>>>>> 727bc8a7067b249aa5aec146e97719d6b34abeda

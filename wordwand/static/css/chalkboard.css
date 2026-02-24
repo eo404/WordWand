@@ -1,0 +1,114 @@
+/* ===== GLOBAL ===== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Fredoka', sans-serif;
+}
+
+body {
+    height: 100vh;
+    background: linear-gradient(to bottom,
+            #f8efd9 0%,
+            #f8efd9 70%,
+            #4ca494 70%,
+            #4ca494 100%);
+}
+
+/* ===== SCENE ===== */
+.scene {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ===== BOARD ===== */
+.board {
+    width: 90%;
+    max-width: 1100px;
+    height: 600px;
+
+    background: #2c3e50;
+    border: 20px solid #b5651d;
+    border-radius: 6px;
+
+    box-shadow:
+        inset 0 0 0 6px #8b4513,
+        0 25px 45px rgba(0, 0, 0, 0.35);
+
+    padding: 40px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ===== TITLE ===== */
+.board h1 {
+    color: white;
+    font-size: 2.8rem;
+    margin-bottom: 30px;
+}
+
+/* ===== BUTTON STYLE ===== */
+.chalk-btn {
+    background: #ecf0f1;
+    border-radius: 18px;
+    border: none;
+    padding: 14px 28px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px #bdc3c7;
+    transition: all 0.15s ease;
+}
+
+.chalk-btn:hover {
+    background: #f1c40f;
+    transform: translateY(-5px);
+    box-shadow: 0 12px #c89f0a;
+}
+
+.chalk-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 5px #c89f0a;
+}
+
+/* ================================
+   VIDEO CONTAINER
+================================ */
+.video-container {
+    width: 65%;
+    max-width: 650px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin: 20px 0;
+    /* remove negative margin */
+}
+
+.letter-video {
+    width: 100%;
+    height: auto;
+    max-height: 320px;
+    /* keeps it inside 600px board */
+
+    border-radius: 20px;
+    object-fit: contain;
+
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* ================================
+   TRACE BUTTONS ROW
+================================ */
+
+.trace-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin-top: 20px;
+}
