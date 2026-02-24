@@ -1,5 +1,5 @@
 // ===============================
-// WORDWAND TRACE ENGINE (Final Stable Version)
+// WORDWAND TRACE ENGINE 
 // ===============================
 
 const canvas = document.getElementById("canvas");
