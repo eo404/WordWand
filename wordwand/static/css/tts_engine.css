@@ -35,7 +35,7 @@ h2 {
     font-size: 22px;
     line-height: 2.0;
     padding: 20px;
-    background: #fafafa;
+    background: #312626;
     border-radius: 8px;
     min-height: 200px;
 }
@@ -51,7 +51,7 @@ h2 {
 
 /* Hard words */
 .hard-word {
-    background: #ffeaa7;
+    background: #f3ce57;
     border: 2px solid #fdcb6e;
     cursor: pointer;
     font-weight: bold;

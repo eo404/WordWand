@@ -1,89 +1,48 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <title>WordWand – Child Home</title>
-    <link rel="stylesheet" href="{% static 'css/child.css' %}">
-    <script src="{% static 'js/child.js' %}"></script>
-</head>
+{% block content %}
 
-<div class="sky-bg">
+<div class="main-board">
 
-    <!-- Stars -->
-    <span class="star s1">✨</span>
-    <span class="star s2">✨</span>
-    <span class="star s3">✨</span>
-    <span class="star s4">✨</span>
+    <div class="hero">
 
-    <!-- Clouds -->
-    <div class="cloud c1"></div>
-    <div class="cloud c2"></div>
-    <div class="cloud c3"></div>
-
-</div>
-
-
-<body>
-
-    <!-- Header -->
-    <header class="topbar">
-        <div class="logo">Word<span>Wand</span></div>
-        <nav>
-            <a href="#" class="nav-link">Home</a>
-            <a href="#" class="nav-link">Courses</a>
-            <a href="#" class="nav-link">Stories</a>
-            <a href="#" class="nav-link">Games</a>
-        </nav>
-    </header>
-
-    <!-- Hero -->
-    <section class="hero">
-        <div class="hero-left">
+        <div>
             <h1>
-                We are making<br>
+                We are making <br>
                 <span>Learning Fun</span>
             </h1>
             <p>Hello 👋 Let’s learn some new words today!</p>
-
         </div>
 
-        <div class="hero-right">
-            <div class="circle">
-                <img src="{% static 'images/kid.png' %}" class="hero-kid" alt="kid">
-            </div>
-        </div>
-    </section>
+        <img src="{% static 'images/kid.png' %}">
+    
+    </div>
 
-    <!-- Learning Cards -->
-    <section class="cards">
-        <a href="{% url 'letters_intro' %}" style="text-decoration:none;" class="card speak">
+    <div class="cards">
+
+        <a href="{% url 'letters_intro' %}" class="card orange">
             <h3>ABC Letters</h3>
             <p>Tap to hear and see letters.</p>
         </a>
 
-        <div class="card yellow speak" data-text="Play Word Games">
+        <div class="card yellow">
             <h3>Word Games</h3>
             <p>Fun games to practice spelling.</p>
         </div>
 
-        <a href="{% url 'reader' %}" style="text-decoration:none;">
-            <div class="card green speak" data-text="Listen and Read">
-                <h3>Read & Listen</h3>
-                <p>Words read aloud with highlight.</p>
-            </div>
+        <a href="{% url 'reader' %}" class="card green">
+            <h3>Read & Listen</h3>
+            <p>Words read aloud with highlight.</p>
         </a>
 
-        <div class="card purple speak" data-text="Talk to your Helper">
+        <div class="card purple">
             <h3>AI Helper</h3>
             <p>Speak and get friendly replies.</p>
         </div>
-    </section>
 
+    </div>
 
+</div>
 
-    <script src="{% static 'js/child.js' %}"></script>
-</body>
-
-</html>
+{% endblock %}
