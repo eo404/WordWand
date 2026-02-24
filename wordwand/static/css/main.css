@@ -1,0 +1,221 @@
+/* ================= GLOBAL ================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Fredoka', sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background: linear-gradient(
+        180deg,
+        #f8efd9 0%,
+        #f8efd9 70%,
+        #4ca494 70%,
+        #4ca494 100%
+    );
+}
+
+/* ================= SCENE ================= */
+
+main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* ================= BUNTING ================= */
+
+.bunting {
+    position: fixed;
+    top: -260px;
+    left: 50%;
+    transform: translateX(-50%) rotate(2deg);
+
+    width: 1400px;
+
+    animation: sway 4.5s ease-in-out infinite;
+
+    z-index: 50;   
+    pointer-events: none;
+}
+
+@keyframes sway {
+    0% { transform: translateX(-50%) rotate(-1deg); }
+    50% { transform: translateX(-50%) rotate(1deg); }
+    100% { transform: translateX(-50%) rotate(-1deg); }
+}
+
+/* ================= TEACHER ================= */
+
+.teacher {
+    position:fixed;
+    bottom: -100px;
+    left: -140px;
+
+    height: 520px;
+
+    pointer-events: none;
+
+    z-index: 60;   
+}
+
+/* ================= MAIN BOARD ================= */
+
+.main-board {
+    width: 95%;
+    max-width: 1200px;
+    min-height: 600px;
+    overflow-y: auto;
+    padding: 70px;
+
+    background: #2c3e50;
+    border: 22px solid #b5651d;
+    border-radius: 6px;
+
+    box-shadow:
+        inset 0 0 0 8px #8b4513,
+        0 30px 60px rgba(0,0,0,0.4);
+
+    position: relative;
+    z-index: 5;
+}
+
+
+/* ================= HERO ================= */
+
+.hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 60px;
+}
+
+.hero h1 {
+    font-size: 48px;
+    color: white;
+}
+
+.hero span {
+    color: #7fd6c4;
+}
+
+.hero p {
+    color: #e6eef2;
+    margin-top: 10px;
+}
+
+.hero img {
+    width: 250px;
+}
+
+/* ================= CARDS ================= */
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+}
+
+.card {
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+}
+
+.orange { background: #f5ac3e; }
+.yellow { background: #fff3c4; }
+.green  { background: #dff7c2; }
+.purple { background: #f3dfff; }
+
+/* ================= LETTERS PAGE ================= */
+
+.letters-title {
+    font-size: 82px;
+    color: rgb(236, 236, 236);
+    letter-spacing: 6px;
+    margin-bottom: 40px;
+}
+
+.start-btn {
+    background: #f15a5a;
+    color: white;
+    font-size: 32px;
+    padding: 18px 60px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    box-shadow: 0 8px 0 #c0392b;
+}
+
+.start-btn:hover {
+    transform: translateY(-3px);
+}
+/* ================= CONTAINER ================= */
+.container {
+    color: white;
+}
+
+.container h2 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+/* ================= READING INNER CARD ================= */
+
+.reading-card {
+    background: #f7f7f7;   /* PURE WHITE */
+    border-radius: 20px;
+    padding: 45px;
+    margin: 40px auto;
+    width: 75%;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+}
+
+/* Upload Section */
+.upload-section {
+    border: 2px dashed #29e9c2;
+    padding: 20px;
+    border-radius: 12px;
+    background: #eaf6ff;
+    text-align: center;
+}
+
+/* Text Display */
+.text-display-section {
+    background: #1e83e7;
+    padding: 25px;
+    border-radius: 14px;
+    margin-top: 25px;
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+/* Buttons */
+.control-panel {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.control-panel button {
+    padding: 12px 28px;
+    border-radius: 25px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.control-panel button:hover {
+    transform: translateY(-3px);
+}

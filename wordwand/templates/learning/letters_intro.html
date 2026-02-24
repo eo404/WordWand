@@ -1,7 +1,9 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
+<<<<<<< HEAD
+{% block content %}
+=======
 <head>
     <meta charset="UTF-8" />
 
@@ -10,18 +12,23 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
 
     <title>WordWand – Letters</title>
+>>>>>>> 727bc8a7067b249aa5aec146e97719d6b34abeda
 
-    <!-- Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+<div class="main-board" style="text-align:center">
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="{% static 'css/letters_intro.css' %}">
-</head>
+    <h1 class="letters-title">LETTERS</h1>
 
-<body>
+    <a href="{% url 'alphabetgrid' %}">
+    <button class="start-btn">
+        START!
+    </button>
+</a>
 
-    <div class="scene">
+</div>
 
+<<<<<<< HEAD
+{% endblock %}
+=======
 
         <!-- BLACKBOARD -->
         <div class="board">
@@ -46,3 +53,4 @@
 </body>
 
 </html>
+>>>>>>> 727bc8a7067b249aa5aec146e97719d6b34abeda
