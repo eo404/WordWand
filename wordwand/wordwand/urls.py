@@ -26,9 +26,11 @@ def redirect_to_home(request):
 
 
 urlpatterns = [
+    path("admin/", admin.site.urls),
     path("", redirect_to_home),
     path("", include("learning.urls")),
     path("", include("tts_engine.urls")),
+    path("", include("users.urls")),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
