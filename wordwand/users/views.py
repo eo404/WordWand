@@ -1,6 +1,6 @@
 from django.shortcuts import render
-
-# Create your views here.
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -243,11 +243,17 @@ def email_verify_confirm_view(request, uidb64, token):
     
     token_generator = PasswordResetTokenGenerator()
     
-    if user is not None and token_generator.check_token(user, token):
-        user.is_active = True
-        user.save()
-        messages.success(request, 'Your email has been verified successfully! You can now login.')
-        return redirect('login')
-    else:
-        messages.error(request, 'Invalid or expired verification link.')
-        return redirect('email-verify')
+    if user is not None:
+        if user.is_active:
+            login(request, user)
+            messages.success(request, f'Welcome back, {user.username}!')
+
+            next_url = request.GET.get('next')
+
+            if next_url and url_has_allowed_host_and_scheme(
+                next_url,
+                allowed_hosts={request.get_host()}
+            ):
+                return redirect(next_url)
+
+        return redirect('home')
