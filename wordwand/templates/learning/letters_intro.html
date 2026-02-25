@@ -1,42 +1,56 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
+<<<<<<< HEAD
+{% block content %}
+=======
 <head>
     <meta charset="UTF-8" />
+
+    <!-- Viewport meta tag with zoom lock -->
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+
     <title>WordWand – Letters</title>
+>>>>>>> 727bc8a7067b249aa5aec146e97719d6b34abeda
 
-    <!-- Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+<div class="main-board" style="text-align:center">
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="{% static 'css/letters_intro.css' %}">
-</head>
+    <h1 class="letters-title">LETTERS</h1>
 
-<body>
+    <a href="{% url 'alphabetgrid' %}">
+    <button class="start-btn">
+        START!
+    </button>
+</a>
 
-    <div class="scene">
+</div>
 
-        <!-- BUNTING -->
-        <img src="{% static 'images/banner.png' %}" alt="Alphabet Bunting" class="bunting" />
-
-        <!-- TEACHER CHARACTER -->
-        <img src="{% static 'images/teacher.png' %}" alt="Teacher Character" class="teacher" />
-
+<<<<<<< HEAD
+{% endblock %}
+=======
 
         <!-- BLACKBOARD -->
         <div class="board">
+
+            <img src="{% static 'images/banner.png' %}" alt="Alphabet Bunting" class="bunting" />
+
             <h1>LETTERS</h1>
+
             <button id="startBtn" class="start-btn" data-next-url="{% url 'alphabetgrid' %}">
                 START!
             </button>
+
+            <!-- TEACHER CHARACTER -->
+            <img src="{% static 'images/teacher.png' %}" alt="Teacher Character" class="teacher" />
+
         </div>
 
     </div>
 
-    <audio id="whoosh" src="{% static 'sounds/whoosh.mp3' %}"></audio>
     <script src="{% static 'js/letters_intro.js' %}"></script>
 
 </body>
 
 </html>
+>>>>>>> 727bc8a7067b249aa5aec146e97719d6b34abeda

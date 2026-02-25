@@ -1,22 +1,21 @@
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
     font-family: 'Fredoka', sans-serif;
 }
 
-html,
-body {
+html, body {
     width: 100%;
     height: 100%;
 }
 
 body {
-    margin: 0;
     background: linear-gradient(to bottom,
-            #f8efd9 0%,
-            #f8efd9 70%,
-            #4ca494 70%,
-            #4ca494 100%);
-    overflow: hidden;
+        #f8efd9 0%,
+        #f8efd9 70%,
+        #4ca494 70%,
+        #4ca494 100%);
 }
 
 /* =========================
@@ -24,109 +23,115 @@ body {
 ========================= */
 .scene {
     width: 100%;
-    height: 100%;
-    position: relative;
+    height: 100vh;
+
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 /* =========================
-   CHALKBOARD (SAME AS INTRO)
+   CHALKBOARD
 ========================= */
 .board {
-    position: relative;
-    z-index: 2;
-
     width: 90%;
     max-width: 1100px;
-    height: 520px;
+    height: 560px;
 
     background: #2c3e50;
     border: 20px solid #b5651d;
-    border-radius: 4px;
+    border-radius: 6px;
 
     box-shadow:
         inset 0 0 0 6px #8b4513,
-        0 25px 45px rgba(0, 0, 0, 0.35);
+        0 25px 45px rgba(0,0,0,0.35);
+
+    padding: 40px;
 
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
 }
 
 /* Title */
 .board h1 {
     color: white;
-    font-size: 46px;
-    margin-bottom: 35px;
-    letter-spacing: 2px;
-    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+    font-size: 2.8rem;
+    text-align: center;
+    margin-bottom: 30px;
+    flex-shrink: 0;
 }
 
 /* =========================
-   ALPHABET GRID
+   GRID – TRUE BOARD FILL
 ========================= */
 .alphabet-grid {
+    flex: 1;
+
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 18px;
+    grid-template-rows: repeat(4, 1fr);
+
+    gap: 22px;
+
+    width: 100%;
+    height: 100%;
 }
 
-/* Letter Buttons */
+/* =========================
+   LETTER BUTTONS
+========================= */
 .letter-btn {
-    width: 72px;
-    height: 72px;
+    width: 100%;
+    height: 100%;
 
     background: #ecf0f1;
-    border-radius: 14px;
+    border-radius: 18px;
     border: none;
 
-    font-size: 30px;
+    font-size: 2.2rem;
     font-weight: 700;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    box-shadow: 0 10px #bdc3c7;
     cursor: pointer;
 
-    box-shadow: 0 6px #bdc3c7;
-    transition:
-        transform 0.15s ease,
-        box-shadow 0.15s ease,
-        background 0.15s ease;
+    transition: all 0.15s ease;
 }
 
 .letter-btn:hover {
     background: #f1c40f;
-    transform: translateY(-4px) scale(1.08);
-    box-shadow: 0 10px #c89f0a;
+    transform: translateY(-6px);
+    box-shadow: 0 14px #c89f0a;
 }
 
 .letter-btn:active {
-    transform: translateY(2px) scale(0.95);
-    box-shadow: 0 4px #c89f0a;
+    transform: translateY(4px);
+    box-shadow: 0 6px #c89f0a;
 }
 
 /* =========================
    RESPONSIVE
 ========================= */
 @media (max-width: 768px) {
+
     .board {
-        height: 420px;
+        height: 480px;
+        padding: 25px;
     }
 
     .alphabet-grid {
         grid-template-columns: repeat(5, 1fr);
-    }
-
-    .letter-btn {
-        width: 60px;
-        height: 60px;
-        font-size: 26px;
+        grid-template-rows: auto;
     }
 }
 
 @media (max-width: 480px) {
+
     .board {
-        height: 360px;
+        height: 420px;
         border-width: 14px;
     }
 

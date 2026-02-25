@@ -1,85 +1,117 @@
+/* =========================
+   GLOBAL RESET
+========================= */
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
     font-family: 'Fredoka', sans-serif;
 }
 
+html {
+    font-size: 16px;
+    /* Prevent zoom on double-tap */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
 body {
-    margin: 0;
-    height: 100vh;
+    min-height: 100vh;
     background: linear-gradient(to bottom,
             #f8efd9 0%,
             #f8efd9 70%,
             #4ca494 70%,
             #4ca494 100%);
-    overflow: hidden;
+    overflow-x: hidden;
+    /* Prevent text scaling on zoom */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Smooth scrolling */
+    -webkit-overflow-scrolling: touch;
 }
 
 /* =========================
    MAIN SCENE
 ========================= */
 .scene {
-    height: 100%;
+    min-height: 100vh;
     width: 100%;
     position: relative;
+
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 /* =========================
-   BUNTING IMAGE (TRANSFORMED)
+   BUNTING - FIXED SIZE
 ========================= */
 .bunting {
     position: absolute;
-    top: -290px;
-    left: 48.5%;
-    width: 100%;
-    max-width: 1500px;
+    top: -380px;
+    /* sits just above wooden frame */
+    left: 50%;
+    transform: translateX(-50%);
 
-    transform: translateX(-50%) rotate(2deg);
-    transform-origin: top center;
+    width: 225%;
+    max-width: 1200px;
+    height: auto;
 
-    animation: sway 4.5s ease-in-out infinite;
-
-    z-index: 10;
+    z-index: 5;
     pointer-events: none;
-   
-}
 
+    animation: sway 4s ease-in-out infinite;
+    filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.25));
+}
 
 /* =========================
    BLACKBOARD
 ========================= */
 .board {
+<<<<<<< HEAD
+    width: 95%;
+    max-width: 1200px;
+    height: 600px;
+
+    background: #2c3e50;
+    border: 22px solid #b5651d;
+=======
     width: 90%;
-
     max-width: 1100px;
+    height: 32rem;
 
-    height: 500px;
     background: #2c3e50;
     border: 20px solid #b5651d;
-    border-radius: 4px;
+>>>>>>> 727bc8a7067b249aa5aec146e97719d6b34abeda
+    border-radius: 6px;
 
     box-shadow:
-        inset 0 0 0 6px #8b4513,
-        0 25px 45px rgba(0, 0, 0, 0.35);
+        inset 0 0 0 8px #8b4513,
+        0 30px 60px rgba(0, 0, 0, 0.4);
 
+<<<<<<< HEAD
     position: relative;
-    margin-top: 100px;
+    margin-top: 120px;
 
+=======
+>>>>>>> 727bc8a7067b249aa5aec146e97719d6b34abeda
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+
+    position: relative;
+    z-index: 2;
 }
 
-/* Chalk text */
+/* Chalk Heading */
 .board h1 {
     color: white;
-    font-size: 82px;
-    letter-spacing: 6px;
-    margin-bottom: 40px;
+    font-size: 5rem;
+    letter-spacing: 0.4rem;
+    margin-bottom: 2rem;
     font-weight: 700;
+
     text-shadow:
         2px 2px 0 rgba(0, 0, 0, 0.3),
         4px 4px 6px rgba(0, 0, 0, 0.2);
@@ -88,11 +120,13 @@ body {
 /* =========================
    START BUTTON
 ========================= */
-#startBtn {
+.start-btn {
     background: #f15a5a;
     color: white;
-    font-size: 32px;
-    padding: 18px 60px;
+
+    font-size: 1.8rem;
+    padding: 1rem 3.5rem;
+
     border-radius: 50px;
     border: none;
     cursor: pointer;
@@ -101,106 +135,210 @@ body {
     letter-spacing: 1px;
 
     box-shadow: 0 8px 0 #c0392b;
+
     transition:
         transform 0.2s ease,
         box-shadow 0.2s ease,
         background 0.2s ease;
+
+    /* Prevent button highlighting on mobile */
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
 }
 
-/* Hover */
-#startBtn:hover {
+.start-btn:hover {
     background: #ff6b6b;
     transform: translateY(-3px) scale(1.05);
     box-shadow: 0 12px 0 #c0392b;
 }
 
-/* Click / Press */
-#startBtn:active {
+.start-btn:active {
     transform: translateY(2px) scale(0.98);
     box-shadow: 0 4px 0 #c0392b;
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
-@media (max-width: 768px) {
-    .bunting {
-        width: 90%;
-        top: 60px;
-    }
-
-    .board {
-        height: 300px;
-        margin-top: 110px;
-    }
-
-    .board h1 {
-        font-size: 52px;
-        margin-bottom: 30px;
-    }
-
-    #startBtn {
-        font-size: 24px;
-        padding: 15px 40px;
-    }
+.start-btn.pressed {
+    transform: translateY(2px) scale(0.98);
+    box-shadow: 0 4px 0 #c0392b;
 }
 
-@media (max-width: 480px) {
-    .bunting {
-        width: 95%;
-        top: 55px;
-    }
-
-    .board {
-        height: 260px;
-        margin-top: 100px;
-        border-width: 12px;
-    }
-
-    .board h1 {
-        font-size: 42px;
-        letter-spacing: 3px;
-        margin-bottom: 25px;
-    }
-
-    #startBtn {
-        font-size: 20px;
-        padding: 12px 35px;
-    }
-}
-
-@keyframes sway {
-    0% {
-        transform: translateX(-50%) rotate(-1.2deg);
-    }
-
-    50% {
-        transform: translateX(-50%) rotate(1.2deg);
-    }
-
-    100% {
-        transform: translateX(-50%) rotate(-1.2deg);
-    }
+.start-btn:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
 }
 
 /* =========================
-   TEACHER CHARACTER
+   TEACHER CHARACTER - FIXED SIZE
 ========================= */
 .teacher {
     position: absolute;
+    bottom: -120px;
+    left: -15%;
 
-    /* move to bottom-left of the board */
-    bottom: -100px;
-    left: -2%;
-
-    height: 520px;
+    height: 480px;
+    /* reduced size */
     width: auto;
 
-    z-index: 4;
-    /* above board background */
+    z-index: 1;
+    /* BELOW text */
     pointer-events: none;
-    /* never block button clicks */
+}
 
-    transition: transform 0.15s ease-out;
-    transform-origin: bottom center;
+/* =========================
+   RESPONSIVE - Adjust fixed sizes for different screen widths
+========================= */
+
+/* Large Desktop */
+@media (min-width: 1600px) {
+    .teacher {
+        height: 600px;
+        /* Slightly larger for big screens */
+    }
+
+    .bunting {
+        width: 1200px;
+        top: -350px;
+    }
+}
+
+/* Standard Desktop */
+@media (max-width: 1400px) {
+    .bunting {
+        width: 950px;
+    }
+
+    .teacher {
+        height: 500px;
+    }
+}
+
+/* Small Desktop / Large Tablet */
+@media (max-width: 1200px) {
+    .bunting {
+        width: 850px;
+        top: -280px;
+    }
+
+    .teacher {
+        height: 450px;
+    }
+}
+
+/* Tablet */
+@media (max-width: 992px) {
+    .bunting {
+        width: 750px;
+        top: -260px;
+    }
+
+    .teacher {
+        height: 400px;
+    }
+}
+
+/* Small Tablet */
+@media (max-width: 768px) {
+    .board {
+        height: 24rem;
+        border-width: 14px;
+    }
+
+    .board h1 {
+        font-size: 3.2rem;
+        letter-spacing: 0.2rem;
+    }
+
+    .start-btn {
+        font-size: 1.3rem;
+        padding: 0.8rem 2.5rem;
+    }
+
+    .teacher {
+        height: 350px;
+        /* Fixed size for tablet */
+    }
+
+    .bunting {
+        width: 650px;
+        /* Fixed size for tablet */
+        top: -240px;
+    }
+}
+
+/* Mobile Landscape */
+@media (max-width: 576px) {
+    .board {
+        height: 22rem;
+    }
+
+    .teacher {
+        height: 300px;
+        /* Fixed size for mobile */
+        left: 2%;
+        /* Adjust position for smaller screens */
+    }
+
+    .bunting {
+        width: 550px;
+        /* Fixed size for mobile */
+        top: -220px;
+    }
+}
+
+/* Mobile Portrait */
+@media (max-width: 480px) {
+    .board {
+        height: 20rem;
+        border-width: 10px;
+    }
+
+    .board h1 {
+        font-size: 2.5rem;
+    }
+
+    .start-btn {
+        font-size: 1.1rem;
+        padding: 0.7rem 2rem;
+    }
+
+    .teacher {
+        height: 250px;
+        /* Fixed size for small mobile */
+        left: 1%;
+    }
+
+    .bunting {
+        width: 450px;
+        /* Fixed size for small mobile */
+        top: -200px;
+    }
+}
+
+/* Very Small Mobile */
+@media (max-width: 360px) {
+    .teacher {
+        height: 220px;
+    }
+
+    .bunting {
+        width: 380px;
+        top: -180px;
+    }
+}
+
+/* =========================
+   ANIMATION
+========================= */
+@keyframes sway {
+    0% {
+        transform: translateX(-50%) rotate(-1deg);
+    }
+
+    50% {
+        transform: translateX(-50%) rotate(1deg);
+    }
+
+    100% {
+        transform: translateX(-50%) rotate(-1deg);
+    }
 }

@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ letter }}</title>
+
+    <link rel="stylesheet" href="{% static 'css/chalkboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/letter_detail.css' %}">
+</head>
+
+<body>
+
+    <div class="scene">
+        <div class="board">
+
+            <h1>Hey, I am {{ letter }}!</h1>
+
+            <!-- Letter Image -->
+            <div class="letter-image-container">
+                <img src="{% static 'letters/' %}{{ letter }}.png" alt="Letter {{ letter }}" class="letter-image"
+                    onclick="playSound()">
+            </div>
+
+            <p style="color: #ffd54f; font-size: 18px; font-weight: 600; margin-bottom: 20px;">
+                Tap me to hear how I sound!
+            </p>
+
+            <!-- Learn to Write Button -->
+            <a href="{% url 'letter_video' letter %}">
+                <button class="chalk-btn">
+                    ✍ Learn to Write
+                </button>
+            </a>
+
+        </div>
+    </div>
+
+    <!-- Letter Sound -->
+    <audio id="letterSound" src="{% static 'sounds/'|add:'sound'|add:letter|add:'.mp3' %}">
+    </audio>
+    <script>
+        function playSound() {
+            const audio = document.getElementById("letterSound");
+            audio.currentTime = 0;
+            audio.play();
+        }
+    </script>
+
+</body>
+
+</html>
