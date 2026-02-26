@@ -1,28 +1,42 @@
-import nltk
-from nltk.corpus import cmudict, words as english_words
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.conf import settings
-import pytesseract
-import cv2
 import os
 import re
 import json
 import time
-from PyPDF2 import PdfReader
-from gtts import gTTS
-from .models import TTSRequest
-from django.contrib.auth.decorators import login_required
 
-# Download NLTK data if not already downloaded
+import cv2
+import nltk
+from nltk.corpus import cmudict, words as english_words
+from gtts import gTTS
+from PyPDF2 import PdfReader
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.conf import settings
+import pytesseract
+
+from .models import TTSRequest
+
+# ---------------------------------------------------------------------------
+# NLTK setup — download once on first use
+# ---------------------------------------------------------------------------
 try:
     nltk.data.find('corpora/cmudict')
 except LookupError:
     nltk.download('cmudict')
+
+try:
+    nltk.data.find('corpora/words')
+except LookupError:
     nltk.download('words')
 
-d = cmudict.dict()
-english = set(english_words.words())
+_cmu_dict = cmudict.dict()
+_english_words = set(english_words.words())
+
+# ---------------------------------------------------------------------------
+# Constants
+# ---------------------------------------------------------------------------
+SUPPORTED_EXTENSIONS = {"png", "jpg", "jpeg", "bmp", "tiff", "pdf", "txt"}
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
 COMMON_WORDS = {
     'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i',
@@ -34,213 +48,188 @@ COMMON_WORDS = {
     'people', 'into', 'year', 'your', 'good', 'some', 'could', 'them', 'see', 'other',
     'than', 'then', 'now', 'look', 'only', 'come', 'its', 'over', 'think', 'also',
     'back', 'after', 'use', 'two', 'how', 'our', 'work', 'first', 'well', 'way',
-    'even', 'new', 'want', 'because', 'any', 'these', 'give', 'day', 'most', 'us'
+    'even', 'new', 'want', 'because', 'any', 'these', 'give', 'day', 'most', 'us',
 }
 
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
 def split_into_syllables(word):
-    word = word.lower().strip()
-    word = re.sub(r'[^\w\s]', '', word)
+    """Return a hyphen-separated syllable breakdown for a word."""
+    word = re.sub(r"[^\w]", "", word.lower().strip())
+    if not word:
+        return word
 
-    if word in d:
-        phonemes = d[word][0]
-        syllables = []
-        current = []
-
+    if word in _cmu_dict:
+        phonemes = _cmu_dict[word][0]
+        syllables, current = [], []
         for phoneme in phonemes:
             current.append(phoneme.rstrip('012'))
             if phoneme[-1].isdigit():
                 syllables.append(''.join(current))
                 current = []
-
+        if current:
+            syllables.append(''.join(current))
         return '-'.join(syllables)
 
+    # Fallback: simple vowel-boundary split
     vowels = 'aeiouy'
-    syllables = []
-    current = []
-
+    syllables, current = [], []
     for i, char in enumerate(word):
         current.append(char)
-        if char in vowels and i < len(word) - 1:
-            next_char = word[i + 1]
-            if next_char not in vowels:
-                syllables.append(''.join(current))
-                current = []
-
+        if char in vowels and i < len(word) - 1 and word[i + 1] not in vowels:
+            syllables.append(''.join(current))
+            current = []
     if current:
         syllables.append(''.join(current))
-
     return '-'.join(syllables) if len(syllables) > 1 else word
 
 
 def is_hard(word):
-    if not word:
+    """Return True if a word is likely difficult for a child reader."""
+    word = re.sub(r"[^\w]", "", word.lower().strip())
+    if not word or len(word) <= 2 or word in COMMON_WORDS:
         return False
-
-    word = word.lower().strip()
-    word = re.sub(r'[^\w\s]', '', word)
-
-    if len(word) <= 2:
-        return False
-
-    if word in COMMON_WORDS:
-        return False
-
     vowels = 'aeiouy'
-    vowel_count = sum(1 for char in word if char in vowels)
-
-    if len(word) >= 6:
-        return True
-
-    if vowel_count >= 3:
-        return True
-
-    if len(word) >= 4 and word not in COMMON_WORDS:
-        return True
-
-    return False
+    vowel_count = sum(1 for c in word if c in vowels)
+    return len(word) >= 6 or vowel_count >= 3 or (len(word) >= 4 and word not in COMMON_WORDS)
 
 
 def extract_text_from_file(file_path, file_ext):
+    """Extract plain text from an uploaded file."""
     text = ""
 
-    if file_ext in ["png", "jpg", "jpeg", "bmp", "tiff"]:
+    if file_ext in {"png", "jpg", "jpeg", "bmp", "tiff"}:
+        pytesseract.pytesseract.tesseract_cmd = settings.TESSERACT_CMD
         img = cv2.imread(file_path)
-        if img is not None:
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            text = pytesseract.image_to_string(gray)
-        else:
-            raise ValueError("Could not read image file")
+        if img is None:
+            raise ValueError("Could not read image file.")
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        text = pytesseract.image_to_string(gray)
 
     elif file_ext == "pdf":
-        reader = PdfReader(file_path)
-        for page in reader.pages:
+        pdf = PdfReader(file_path)
+        for page in pdf.pages:
             page_text = page.extract_text()
             if page_text:
                 text += page_text + "\n"
 
     elif file_ext == "txt":
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                text = f.read()
-        except UnicodeDecodeError:
-            with open(file_path, "r", encoding="latin-1") as f:
-                text = f.read()
-
-    else:
-        raise ValueError(f"Unsupported file type: {file_ext}")
+        for encoding in ("utf-8", "latin-1"):
+            try:
+                with open(file_path, "r", encoding=encoding) as f:
+                    text = f.read()
+                break
+            except UnicodeDecodeError:
+                continue
 
     return text.strip()
 
 
 def clean_text(text):
-    if not text:
-        return ""
+    """Normalise whitespace and punctuation spacing."""
     text = re.sub(r'\s+', ' ', text)
     text = re.sub(r'\s+([.,!?;:])', r'\1', text)
     text = re.sub(r'([.,!?;:])(\w)', r'\1 \2', text)
     return text.strip()
 
 
+# ---------------------------------------------------------------------------
+# View
+# ---------------------------------------------------------------------------
+
 @login_required
 def reader(request):
-    text = ""
-    error = ""
-    audio_url = ""
-    hard_words = []
-    unique_hard_words = []
-    word_syllables = {}
+    context = {
+        "text": "",
+        "error": "",
+        "audio_url": "",
+        "hard_words": json.dumps([]),
+        "unique_hard_words": json.dumps([]),
+        "syllables": json.dumps({}),
+    }
 
-    if request.method == "POST" and request.FILES.get("file"):
+    if request.method != "POST":
+        return render(request, "reader.html", context)
+
+    uploaded_file = request.FILES.get("file")
+    if not uploaded_file:
+        context["error"] = "Please select a file."
+        return render(request, "reader.html", context)
+
+    if uploaded_file.size > MAX_FILE_SIZE:
+        context["error"] = "File too large. Maximum size is 10 MB."
+        return render(request, "reader.html", context)
+
+    file_name = uploaded_file.name
+    file_ext = file_name.rsplit(".", 1)[-1].lower() if "." in file_name else ""
+
+    if file_ext not in SUPPORTED_EXTENSIONS:
+        context["error"] = f"Unsupported file type '.{file_ext}'. Allowed: {', '.join(sorted(SUPPORTED_EXTENSIONS))}."
+        return render(request, "reader.html", context)
+
+    media_dir = settings.MEDIA_ROOT
+    os.makedirs(media_dir, exist_ok=True)
+    # Use a random suffix to avoid filename collisions
+    safe_name = f"{os.urandom(8).hex()}_{file_name}"
+    file_path = os.path.join(media_dir, safe_name)
+
+    try:
         start_time = time.time()
 
-        uploaded_file = request.FILES["file"]
-        file_name = uploaded_file.name
+        with open(file_path, "wb+") as f:
+            for chunk in uploaded_file.chunks():
+                f.write(chunk)
 
-        if uploaded_file.size > 10 * 1024 * 1024:
-            error = "File size too large. Maximum size is 10MB."
-            return render(request, "reader.html", {"error": error})
+        text = extract_text_from_file(file_path, file_ext)
 
-        media_dir = settings.MEDIA_ROOT
-        os.makedirs(media_dir, exist_ok=True)
+        if not text or len(text.strip()) < 10:
+            context["error"] = "No readable text found in the file."
+            return render(request, "reader.html", context)
 
-        file_path = os.path.join(media_dir, file_name)
+        text = clean_text(text)
 
-        try:
-            with open(file_path, "wb+") as f:
-                for chunk in uploaded_file.chunks():
-                    f.write(chunk)
+        # Generate TTS audio
+        tts = gTTS(text, lang='en')
+        audio_filename = f"speech_{os.urandom(4).hex()}.mp3"
+        audio_path = os.path.join(media_dir, "tts_audio", audio_filename)
+        os.makedirs(os.path.dirname(audio_path), exist_ok=True)
+        tts.save(audio_path)
+        audio_url = f"{settings.MEDIA_URL}tts_audio/{audio_filename}"
 
-            file_ext = file_name.split(".")[-1].lower()
-            supported_extensions = ["png", "jpg",
-                                    "jpeg", "bmp", "tiff", "pdf", "txt"]
+        # Hard-word detection
+        words_raw = re.findall(r"\b[\w']+\b", text)
+        hard_words = [w.lower() for w in words_raw if is_hard(re.sub(r"[^\w]", "", w.lower()))]
+        unique_hard_words = sorted(set(hard_words))
+        word_syllables = {w: split_into_syllables(w) for w in unique_hard_words}
 
-            if file_ext not in supported_extensions:
-                error = "Unsupported file type."
-                os.remove(file_path)
-                return render(request, "reader.html", {"error": error})
+        processing_time = round(time.time() - start_time, 2)
 
-            text = extract_text_from_file(file_path, file_ext)
+        TTSRequest.objects.create(
+            user=request.user,
+            audio_file=f"tts_audio/{audio_filename}",
+            extracted_text=text,
+            hard_words=unique_hard_words,
+            syllables=word_syllables,
+            file_type=file_ext,
+            processing_time=processing_time,
+        )
 
-            if not text or len(text.strip()) < 10:
-                error = "No readable text found."
-                os.remove(file_path)
-                return render(request, "reader.html", {"error": error})
+        context.update({
+            "text": text,
+            "audio_url": audio_url,
+            "hard_words": json.dumps(hard_words),
+            "unique_hard_words": json.dumps(unique_hard_words),
+            "syllables": json.dumps(word_syllables, ensure_ascii=False),
+        })
 
-            text = clean_text(text)
+    except Exception as e:
+        context["error"] = f"Error processing file: {e}"
 
-            # Generate audio
-            tts = gTTS(text, lang='en')
-            audio_filename = f"speech_{os.path.splitext(file_name)[0]}_{os.urandom(4).hex()}.mp3"
-            audio_path = os.path.join(media_dir, audio_filename)
-            tts.save(audio_path)
-            audio_url = f"/media/{audio_filename}"
-
-            words_with_case = re.findall(r'\b[\w\']+\b', text)
-            words_lower = [w.lower() for w in words_with_case]
-
-            for i, word in enumerate(words_lower):
-                clean_word = re.sub(r'[^\w\s]', '', word)
-                if len(clean_word) <= 2:
-                    continue
-                if is_hard(clean_word):
-                    hard_words.append(words_with_case[i].lower())
-
-            unique_hard_words = sorted(list(set(hard_words)))
-
-            for word in unique_hard_words:
-                word_syllables[word] = split_into_syllables(word)
-
-            processing_time = round(time.time() - start_time, 2)
-
-            # Save to database
-            TTSRequest.objects.create(
-                user=request.user,
-                extracted_text=text,
-                audio_file=f"tts_audio/{audio_filename}",
-                hard_words=unique_hard_words,
-                syllables=word_syllables,
-                file_type=file_ext,
-                processing_time=processing_time
-            )
-
+    finally:
+        # Always clean up the temp upload
+        if os.path.exists(file_path):
             os.remove(file_path)
-
-        except Exception as e:
-            error = f"Error processing file: {str(e)}"
-            if os.path.exists(file_path):
-                os.remove(file_path)
-
-    elif request.method == "POST":
-        error = "Please select a file."
-
-    context = {
-        "text": text,
-        "error": error,
-        "audio_url": audio_url,
-        "hard_words": json.dumps(hard_words),
-        "unique_hard_words": json.dumps(unique_hard_words),
-        "syllables": json.dumps(word_syllables, ensure_ascii=False)
-    }
 
     return render(request, "reader.html", context)

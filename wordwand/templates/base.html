@@ -5,7 +5,10 @@
     <meta charset="UTF-8">
     <title>WordWand</title>
 
-    <!-- Font -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
 
     <!-- Main CSS -->
@@ -14,14 +17,26 @@
 
 <body>
 
+    <!-- Navbar -->
+    {% include "navbar.html" %}
+
     <!-- Global Decorations -->
     <img src="{% static 'images/banner.png' %}" class="bunting">
     <img src="{% static 'images/teacher.png' %}" class="teacher">
+
+    <!-- Flash Messages -->
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message message-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
     <!-- Page Content -->
     <main>
         {% block content %}{% endblock %}
     </main>
-    
+
 </body>
 </html>

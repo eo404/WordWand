@@ -1,0 +1,121 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — WordWand</title>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon">📖</div>
+        <span class="logo-text">WordWand</span>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-label">Main</div>
+        <a href="{% url 'dashboard' %}" class="nav-item active">Overview</a>
+        <a href="{% url 'home' %}" class="nav-item">Home</a>
+
+        <div class="nav-label mt">Account</div>
+        <a href="{% url 'profile' %}?next={% url 'dashboard' %}" class="nav-item">Settings</a>
+
+        <form method="POST" action="{% url 'logout' %}" class="logout-form">
+          {% csrf_token %}
+          <button type="submit" class="nav-item logout-btn">Log Out</button>
+        </form>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <div class="main">
+
+      <header class="topbar">
+        <div>
+          <h1>Good morning, {{ user.first_name|default:user.username }} 👋</h1>
+          <p>Here's what's happening with your learning today.</p>
+        </div>
+      </header>
+
+      <div class="content">
+
+        <div class="grid-two">
+
+          <!-- Hours Chart -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Hours Spent This Week</span>
+              <div id="chartLegend" class="chart-legend"></div>
+            </div>
+            <div class="card-body">
+              {% if chart_courses %}
+              <canvas id="hoursChart" height="180"></canvas>
+              {% else %}
+              <div class="empty-state">No activity data yet.</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Progress Donut -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Progress</span>
+            </div>
+            <div class="card-body">
+              <div class="donut-wrap">
+                <canvas id="progressChart"></canvas>
+                <div class="donut-label">
+                  <span class="pct">{{ completed_pct }}%</span>
+                  <span class="sub">Done</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  {{ chart_courses|json_script:"chart-courses-data" }}
+  {{ days|json_script:"days-data" }}
+  {{ completed_pct|json_script:"completed-pct-data" }}
+  {{ in_progress_pct|json_script:"inprogress-pct-data" }}
+  
+  <script>
+    const chartCoursesRaw = JSON.parse(
+      document.getElementById("chart-courses-data").textContent
+    );
+
+    const days = JSON.parse(
+      document.getElementById("days-data").textContent
+    );
+
+    const completedPct = JSON.parse(
+      document.getElementById("completed-pct-data").textContent
+    );
+
+    const inProgressPct = JSON.parse(
+      document.getElementById("inprogress-pct-data").textContent
+    );
+  </script>
+
+  <script src="{% static 'js/dashboard.js' %}"></script>
+
+</body>
+
+</html>

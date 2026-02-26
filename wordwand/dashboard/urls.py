@@ -2,5 +2,5 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("reader/", views.reader, name="reader"),
+    path('dashboard/', views.dashboard_view, name='dashboard'),
 ]

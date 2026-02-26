@@ -1,53 +1,27 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.contrib.auth.models import User
-from django import forms
+
+from .forms import UserRegisterForm, UserLoginForm, UserProfileUpdateForm
 
 
 # ----------------------------
-# Custom Register Form
-# ----------------------------
-class RegisterForm(UserCreationForm):
-    email = forms.EmailField(required=True)
-    first_name = forms.CharField(required=False)
-    last_name = forms.CharField(required=False)
-
-    class Meta:
-        model = User
-        fields = [
-            "username",
-            "email",
-            "password1",
-            "password2",
-            "first_name",
-            "last_name",
-        ]
-
-
-# ----------------------------
-# Register View (No Email Verification)
+# Register View
 # ----------------------------
 def register_view(request):
     if request.user.is_authenticated:
         return redirect("profile")
 
     if request.method == "POST":
-        form = RegisterForm(request.POST)
+        form = UserRegisterForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.is_active = True  # Direct activation
-            user.save()
-
-            # Auto login after register
+            user = form.save()
             login(request, user)
-
             messages.success(request, "Account created successfully!")
             return redirect("profile")
     else:
-        form = RegisterForm()
+        form = UserRegisterForm()
 
     return render(request, "user_authentication/register.html", {"form": form})
 
@@ -60,41 +34,47 @@ def login_view(request):
         return redirect("profile")
 
     if request.method == "POST":
-        form = AuthenticationForm(request, data=request.POST)
+        form = UserLoginForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
             messages.success(request, "Logged in successfully!")
-            return redirect("profile")
+            next_url = request.POST.get("next") or request.GET.get("next") or "profile"
+            return redirect(next_url)
     else:
-        form = AuthenticationForm()
+        form = UserLoginForm()
 
     return render(request, "user_authentication/login.html", {"form": form})
 
 
 # ----------------------------
-# Logout View
+# Logout View (POST only for CSRF safety)
 # ----------------------------
 def logout_view(request):
-    logout(request)
-    messages.success(request, "Logged out successfully.")
+    if request.method == "POST":
+        logout(request)
+        messages.success(request, "Logged out successfully.")
     return redirect("login")
 
 
 # ----------------------------
 # Profile View
 # ----------------------------
-from .forms import UserProfileUpdateForm
-
 @login_required
 def profile_view(request):
+    # Preserve the next URL across GET and POST
+    next_url = request.POST.get("next") or request.GET.get("next", "")
+
     if request.method == "POST":
         form = UserProfileUpdateForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, "Profile updated successfully!")
-            return redirect("profile")
+            return redirect(next_url) if next_url else redirect("profile")
     else:
         form = UserProfileUpdateForm(instance=request.user)
 
-    return render(request, "user_authentication/profile.html", {"form": form})
+    return render(request, "user_authentication/profile.html", {
+        "form": form,
+        "next": next_url,
+    })
