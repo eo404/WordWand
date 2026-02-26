@@ -30,13 +30,23 @@
             <!-- YOUR ORIGINAL READER CONTENT (UNCHANGED) -->
             <div class="container">
 
-                <h2>📚 WordWand – Read & Listen 📚</h2>
+                <h2>Read & Listen </h2>
 
                 <div class="upload-section">
-                    <form method="POST" enctype="multipart/form-data">
+                    <form method="POST" enctype="multipart/form-data" class="chalk-upload-form">
                         {% csrf_token %}
-                        <input type="file" name="file" required>
-                        <button type="submit">📁 Read File</button>
+                
+                        <!-- Hidden real input -->
+                        <input type="file" id="fileInput" name="file" required hidden>
+                
+                        <!-- Custom Button -->
+                        <label for="fileInput" class="chalk-btn">Choose File</label>
+                
+                        <!-- File Name Display -->
+                        <span id="fileName" class="file-name"></span>
+                
+                        <!-- Submit -->
+                        <button type="submit" class="chalk-btn-outline">Read File</button>
                     </form>
                 </div>
 
@@ -52,7 +62,7 @@
 
                 <div class="control-panel">
                     <button onclick="readNormal()">▶ Read</button>
-                    <button onclick="readSlow()">🐢 Slow</button>
+                    <button onclick="readSlow()">Slow</button>
                     <button onclick="stopSpeech()">⏹ Stop</button>
                 </div>
                 {% endif %}
@@ -77,7 +87,7 @@
             <h2 id="popup-word"></h2>
             <div id="letter-box"></div>
             <div style="margin-top: 20px;">
-                <button onclick="speakPopupWord()">🔊 Hear Again</button>
+                <button onclick="speakPopupWord()">Hear Again</button>
                 <button onclick="closePopup()">Close</button>
             </div>
         </div>
