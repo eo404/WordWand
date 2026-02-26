@@ -1,344 +1,85 @@
 /* =========================
-   GLOBAL RESET
+   PAGE BACKGROUND
 ========================= */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: 'Fredoka', sans-serif;
-}
-
-html {
-    font-size: 16px;
-    /* Prevent zoom on double-tap */
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-}
 
 body {
     min-height: 100vh;
-    background: linear-gradient(to bottom,
-            #f8efd9 0%,
-            #f8efd9 70%,
-            #4ca494 70%,
-            #4ca494 100%);
+    background: linear-gradient(
+        to bottom,
+        #f8efd9 0%,
+        #f8efd9 70%,
+        #4ca494 70%,
+        #4ca494 100%
+    );
     overflow-x: hidden;
-    /* Prevent text scaling on zoom */
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-    /* Smooth scrolling */
-    -webkit-overflow-scrolling: touch;
 }
 
-/* =========================
-   MAIN SCENE
-========================= */
-.scene {
-    min-height: 100vh;
-    width: 100%;
-    position: relative;
+/* ===== Letters Page Center Fix ===== */
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* =========================
-   BUNTING - FIXED SIZE
-========================= */
-.bunting {
-    position: absolute;
-    top: -380px;
-    /* sits just above wooden frame */
-    left: 50%;
-    transform: translateX(-50%);
-
-    width: 225%;
-    max-width: 1200px;
-    height: auto;
-
-    z-index: 5;
-    pointer-events: none;
-
-    animation: sway 4s ease-in-out infinite;
-    filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.25));
-}
-
-/* =========================
-   BLACKBOARD
-========================= */
-.board {
-<<<<<<< HEAD
-    width: 95%;
-    max-width: 1200px;
-    height: 600px;
-
-    background: #2c3e50;
-    border: 22px solid #b5651d;
-=======
-    width: 90%;
-    max-width: 1100px;
-    height: 32rem;
-
-    background: #2c3e50;
-    border: 20px solid #b5651d;
->>>>>>> 727bc8a7067b249aa5aec146e97719d6b34abeda
-    border-radius: 6px;
-
-    box-shadow:
-        inset 0 0 0 8px #8b4513,
-        0 30px 60px rgba(0, 0, 0, 0.4);
-
-<<<<<<< HEAD
-    position: relative;
-    margin-top: 120px;
-
-=======
->>>>>>> 727bc8a7067b249aa5aec146e97719d6b34abeda
+body.letters-page .main-board {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-
-    position: relative;
-    z-index: 2;
+    padding-top: 120px; 
+    justify-content: flex-start;
 }
 
-/* Chalk Heading */
-.board h1 {
-    color: white;
-    font-size: 5rem;
-    letter-spacing: 0.4rem;
-    margin-bottom: 2rem;
-    font-weight: 700;
+body.letters-page .letters-title {
+    text-align: center;
+    width: 100%;
+    margin-bottom: 50px;
+}
 
-    text-shadow:
-        2px 2px 0 rgba(0, 0, 0, 0.3),
-        4px 4px 6px rgba(0, 0, 0, 0.2);
+body.letters-page .start-btn {
+    margin: 0 auto;
 }
 
 /* =========================
-   START BUTTON
+   BUNTING POSITION
 ========================= */
-.start-btn {
-    background: #f15a5a;
-    color: white;
 
-    font-size: 1.8rem;
-    padding: 1rem 3.5rem;
-
-    border-radius: 50px;
-    border: none;
-    cursor: pointer;
-
-    font-weight: 700;
-    letter-spacing: 1px;
-
-    box-shadow: 0 8px 0 #c0392b;
-
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        background 0.2s ease;
-
-    /* Prevent button highlighting on mobile */
-    -webkit-tap-highlight-color: transparent;
-    outline: none;
-}
-
-.start-btn:hover {
-    background: #ff6b6b;
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 12px 0 #c0392b;
-}
-
-.start-btn:active {
-    transform: translateY(2px) scale(0.98);
-    box-shadow: 0 4px 0 #c0392b;
-}
-
-.start-btn.pressed {
-    transform: translateY(2px) scale(0.98);
-    box-shadow: 0 4px 0 #c0392b;
-}
-
-.start-btn:disabled {
-    opacity: 0.8;
-    cursor: not-allowed;
-}
-
-/* =========================
-   TEACHER CHARACTER - FIXED SIZE
-========================= */
-.teacher {
-    position: absolute;
-    bottom: -120px;
-    left: -15%;
-
-    height: 480px;
-    /* reduced size */
-    width: auto;
-
-    z-index: 1;
-    /* BELOW text */
+.bunting {
+    position: fixed;
+    top: -260px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1400px;
+    animation: sway 4s ease-in-out infinite;
+    z-index: 50;
     pointer-events: none;
 }
 
 /* =========================
-   RESPONSIVE - Adjust fixed sizes for different screen widths
+   TEACHER POSITION
 ========================= */
 
-/* Large Desktop */
-@media (min-width: 1600px) {
-    .teacher {
-        height: 600px;
-        /* Slightly larger for big screens */
-    }
-
-    .bunting {
-        width: 1200px;
-        top: -350px;
-    }
+.teacher {
+    position: fixed;
+    bottom: -100px;
+    left: -120px;
+    height: 520px;
+    pointer-events: none;
+    z-index: 60;
 }
 
-/* Standard Desktop */
-@media (max-width: 1400px) {
-    .bunting {
-        width: 950px;
-    }
+/* =========================
+   LETTERS TITLE (Specific To This Page)
+========================= */
 
-    .teacher {
-        height: 500px;
-    }
-}
-
-/* Small Desktop / Large Tablet */
-@media (max-width: 1200px) {
-    .bunting {
-        width: 850px;
-        top: -280px;
-    }
-
-    .teacher {
-        height: 450px;
-    }
-}
-
-/* Tablet */
-@media (max-width: 992px) {
-    .bunting {
-        width: 750px;
-        top: -260px;
-    }
-
-    .teacher {
-        height: 400px;
-    }
-}
-
-/* Small Tablet */
-@media (max-width: 768px) {
-    .board {
-        height: 24rem;
-        border-width: 14px;
-    }
-
-    .board h1 {
-        font-size: 3.2rem;
-        letter-spacing: 0.2rem;
-    }
-
-    .start-btn {
-        font-size: 1.3rem;
-        padding: 0.8rem 2.5rem;
-    }
-
-    .teacher {
-        height: 350px;
-        /* Fixed size for tablet */
-    }
-
-    .bunting {
-        width: 650px;
-        /* Fixed size for tablet */
-        top: -240px;
-    }
-}
-
-/* Mobile Landscape */
-@media (max-width: 576px) {
-    .board {
-        height: 22rem;
-    }
-
-    .teacher {
-        height: 300px;
-        /* Fixed size for mobile */
-        left: 2%;
-        /* Adjust position for smaller screens */
-    }
-
-    .bunting {
-        width: 550px;
-        /* Fixed size for mobile */
-        top: -220px;
-    }
-}
-
-/* Mobile Portrait */
-@media (max-width: 480px) {
-    .board {
-        height: 20rem;
-        border-width: 10px;
-    }
-
-    .board h1 {
-        font-size: 2.5rem;
-    }
-
-    .start-btn {
-        font-size: 1.1rem;
-        padding: 0.7rem 2rem;
-    }
-
-    .teacher {
-        height: 250px;
-        /* Fixed size for small mobile */
-        left: 1%;
-    }
-
-    .bunting {
-        width: 450px;
-        /* Fixed size for small mobile */
-        top: -200px;
-    }
-}
-
-/* Very Small Mobile */
-@media (max-width: 360px) {
-    .teacher {
-        height: 220px;
-    }
-
-    .bunting {
-        width: 380px;
-        top: -180px;
-    }
+.letters-title {
+    font-size: 82px;
+    color: white;
+    letter-spacing: 6px;
+    margin-bottom: 40px;
+    font-weight: 700;
 }
 
 /* =========================
    ANIMATION
 ========================= */
+
 @keyframes sway {
-    0% {
-        transform: translateX(-50%) rotate(-1deg);
-    }
-
-    50% {
-        transform: translateX(-50%) rotate(1deg);
-    }
-
-    100% {
-        transform: translateX(-50%) rotate(-1deg);
-    }
+    0% { transform: translateX(-50%) rotate(-1deg); }
+    50% { transform: translateX(-50%) rotate(1deg); }
+    100% { transform: translateX(-50%) rotate(-1deg); }
 }

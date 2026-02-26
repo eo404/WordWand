@@ -1,56 +1,32 @@
-{% extends "base.html" %}
 {% load static %}
-
-<<<<<<< HEAD
-{% block content %}
-=======
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
-
-    <!-- Viewport meta tag with zoom lock -->
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WordWand – Letters</title>
->>>>>>> 727bc8a7067b249aa5aec146e97719d6b34abeda
 
-<div class="main-board" style="text-align:center">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/letters_intro.css' %}">
+</head>
 
-    <h1 class="letters-title">LETTERS</h1>
+<body class="letters-page">
 
-    <a href="{% url 'alphabetgrid' %}">
-    <button class="start-btn">
-        START!
-    </button>
-</a>
+    <img src="{% static 'images/banner.png' %}" class="bunting">
+    <img src="{% static 'images/teacher.png' %}" class="teacher">
 
-</div>
+    <main>
+        <div class="main-board">
+            <h1 class="letters-title">LETTERS</h1>
 
-<<<<<<< HEAD
-{% endblock %}
-=======
-
-        <!-- BLACKBOARD -->
-        <div class="board">
-
-            <img src="{% static 'images/banner.png' %}" alt="Alphabet Bunting" class="bunting" />
-
-            <h1>LETTERS</h1>
-
-            <button id="startBtn" class="start-btn" data-next-url="{% url 'alphabetgrid' %}">
+            <button id="startBtn"
+                    class="start-btn"
+                    data-next-url="{% url 'alphabetgrid' %}">
                 START!
             </button>
-
-            <!-- TEACHER CHARACTER -->
-            <img src="{% static 'images/teacher.png' %}" alt="Teacher Character" class="teacher" />
-
         </div>
-
-    </div>
-
+    </main>
     <script src="{% static 'js/letters_intro.js' %}"></script>
 
 </body>
-
 </html>
->>>>>>> 727bc8a7067b249aa5aec146e97719d6b34abeda
