@@ -32,7 +32,13 @@
             
             <div class="mb-3">
                 <label for="id_password" class="form-label">Password</label>
-                {{ form.password }}
+                <div class="input-group">
+                    {{ form.password }}
+                    <button type="button" class="btn btn-outline-secondary"
+                        onclick="togglePassword('id_password')">
+                        Show
+                    </button>
+                </div>
                 {% if form.password.errors %}
                     <ul class="errorlist">
                         {% for error in form.password.errors %}
@@ -47,8 +53,17 @@
         
         <div class="form-link">
             <p>Don't have an account? <a href="{% url 'register' %}">Sign up here</a></p>
-            <p><a href="{% url 'password-reset' %}">Forgot your password?</a></p>
         </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+function togglePassword(id) {
+    const field = document.getElementById(id);
+    field.type = field.type === "password" ? "text" : "password";
+}
+</script>
+{% endblock %}
+
 {% endblock %}

@@ -11,29 +11,8 @@ class UserProfile(models.Model):
     phone_number = models.CharField(max_length=15, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
 
-    email_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-
-class EmailVerification(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    token = models.CharField(max_length=255)
-    is_used = models.BooleanField(default=False)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField()
-
-
-class PasswordResetToken(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    token = models.CharField(max_length=255)
-    is_used = models.BooleanField(default=False)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField()
 
 
 class LoginActivity(models.Model):

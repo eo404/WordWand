@@ -44,7 +44,13 @@
             
             <div class="mb-3">
                 <label for="id_password1" class="form-label">Password</label>
-                {{ form.password1 }}
+                <div class="input-group">
+                    {{ form.password1 }}
+                    <button type="button" class="btn btn-outline-secondary"
+                        onclick="togglePassword('id_password1')">
+                        Show
+                    </button>
+                </div>
                 {% if form.password1.errors %}
                     <ul class="errorlist">
                         {% for error in form.password1.errors %}
@@ -61,7 +67,13 @@
             
             <div class="mb-3">
                 <label for="id_password2" class="form-label">Confirm Password</label>
-                {{ form.password2 }}
+                <div class="input-group">
+                    {{ form.password2 }}
+                    <button type="button" class="btn btn-outline-secondary"
+                        onclick="togglePassword('id_password2')">
+                        Show
+                    </button>
+                </div>
                 {% if form.password2.errors %}
                     <ul class="errorlist">
                         {% for error in form.password2.errors %}
@@ -72,12 +84,12 @@
             </div>
             
             <div class="mb-3">
-                <label for="id_first_name" class="form-label">First Name (Optional)</label>
+                <label for="id_first_name" class="form-label">First Name</label>
                 {{ form.first_name }}
             </div>
             
             <div class="mb-3">
-                <label for="id_last_name" class="form-label">Last Name (Optional)</label>
+                <label for="id_last_name" class="form-label">Last Name</label>
                 {{ form.last_name }}
             </div>
             
@@ -89,4 +101,14 @@
         </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+function togglePassword(id) {
+    const field = document.getElementById(id);
+    field.type = field.type === "password" ? "text" : "password";
+}
+</script>
+{% endblock %}
+
 {% endblock %}
