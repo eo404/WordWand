@@ -1,23 +1,39 @@
 /* ===== Base Layout ===== */
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f0f4f8;
-    padding: 20px;
-    color: #2d3436;
+.main-board .container {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 60px 80px !important;
+    max-width: 100% !important;
 }
 
-.container {
-    max-width: 1000px;
-    margin: auto;
-    background: #fff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-h2 {
+/* Make heading look like chalk */
+.main-board h2 {
+    color: #ffffff !important;
+    font-size: 48px;
+    font-family: 'Patrick Hand', cursive;
     text-align: center;
-    color: #0984e3;
+    text-shadow:
+        2px 2px 0px rgba(255, 255, 255, 0.2),
+        -1px -1px 2px rgba(255, 255, 255, 0.3);
+}
+
+/* Upload area transparent */
+.main-board .upload-section {
+    background: transparent !important;
+    border: 2px dashed rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Remove light blue color */
+.main-board .upload-section input,
+.main-board .upload-section button {
+    background: transparent !important;
+    color: white !important;
+}
+
+/* Text area already dark — remove extra card feel */
+.main-board #text-container {
+    background: transparent !important;
 }
 
 /* ===== Upload Section ===== */
@@ -176,4 +192,64 @@ h2 {
     100% {
         transform: scale(1);
     }
+}
+
+/* ========================= */
+/* CHALK UPLOAD AREA */
+/* ========================= */
+
+.main-board .upload-section {
+    background: transparent !important;
+    border: 2px dashed rgba(255, 255, 255, 0.5) !important;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+/* Layout */
+.chalk-upload-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+/* Chalk filled button */
+.chalk-btn {
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+    padding: 10px 20px;
+    font-family: 'Patrick Hand', cursive;
+    font-size: 20px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.chalk-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Outline style */
+.chalk-btn-outline {
+    background: transparent;
+    border: 2px dashed white;
+    color: white;
+    padding: 10px 20px;
+    font-family: 'Patrick Hand', cursive;
+    font-size: 20px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.chalk-btn-outline:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* File name text */
+.file-name {
+    color: #ffffff;
+    font-size: 18px;
+    opacity: 0.8;
 }
