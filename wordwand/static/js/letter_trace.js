@@ -224,7 +224,7 @@ function retry() {
 // ===============================
 
 function goToAlphabet() {
-    window.location.href = "/alphabetgrid";
+    window.location.href = "/letters/grid/";
 }
 
 // ===============================

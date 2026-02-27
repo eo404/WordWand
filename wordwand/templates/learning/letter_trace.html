@@ -5,32 +5,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trace {{ letter }}</title>
+    <title>Trace {{ letter }} — WordWand</title>
 
     <link rel="stylesheet" href="{% static 'css/chalkboard.css' %}">
     <style>
         @keyframes floatStar {
-            0% {
-                transform: translate(0, 0) scale(1);
-                opacity: 1;
-            }
-    
-            100% {
-                transform: translateY(-120px) scale(1.5);
-                opacity: 0;
-            }
+            0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translateY(-120px) scale(1.5); opacity: 0; }
         }
-    
         @keyframes confettiFall {
-            0% {
-                transform: translate(-50%, -50%) rotate(0deg);
-                opacity: 1;
-            }
-    
-            100% {
-                transform: translate(calc(-50% + 200px), 300px) rotate(360deg);
-                opacity: 0;
-            }
+            0%   { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; }
+            100% { transform: translate(calc(-50% + 200px), 300px) rotate(360deg); opacity: 0; }
         }
     </style>
 </head>
@@ -42,32 +27,27 @@
 
             <h1>Trace Letter {{ letter }}</h1>
 
-            <!-- Drawing Area -->
             <div style="position:relative; width:600px; height:400px; margin-bottom:20px;">
-                <canvas id="canvas" style="position:absolute; width:100%; height:100%;">
-                </canvas>
+                <canvas id="canvas" style="position:absolute; width:100%; height:100%;"></canvas>
             </div>
 
-            <!-- Buttons -->
-        <div class="trace-buttons">
-            <button class="chalk-btn" onclick="checkDrawing()">Check</button>
-            <button class="chalk-btn" onclick="retry()">Retry</button>
-            <button id="backBtn" class="chalk-btn" onclick="goToAlphabet()" style="display:none;">
-                Back to Letters
-            </button>
+            <div class="trace-buttons">
+                <button class="chalk-btn" onclick="checkDrawing()">Check</button>
+                <button class="chalk-btn" onclick="retry()">Retry</button>
+                <button id="backBtn" class="chalk-btn" onclick="goToAlphabet()" style="display:none;">
+                    Back to Letters
+                </button>
+            </div>
+
+            <p id="resultText" style="color:white; margin-top:15px;"></p>
+
         </div>
-        
-        <p id="resultText" style="color:white; margin-top:15px;"></p>
     </div>
 
-    <!-- VERY IMPORTANT: Pass Letter to JS -->
     <script>
         const currentLetter = "{{ letter }}";
     </script>
-
-    <!-- Load JS AFTER defining currentLetter -->
     <script src="{% static 'js/letter_trace.js' %}"></script>
 
 </body>
-
 </html>

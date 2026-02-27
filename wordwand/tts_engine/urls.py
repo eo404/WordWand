@@ -1,6 +1,6 @@
 from django.urls import path
-from . import views
+from .views import reader
 
 urlpatterns = [
-    path("reader/", views.reader, name="reader"),
+    path("reader/", reader, name="reader"),
 ]

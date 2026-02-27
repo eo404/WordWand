@@ -139,3 +139,13 @@ body {
         grid-template-columns: repeat(4, 1fr);
     }
 }
+
+/* ── Make <a> links look identical to the old <button> ── */
+a.letter-btn {
+    text-decoration: none;
+    color: #2c3e50;
+}
+
+a.letter-btn:visited {
+    color: #2c3e50;
+}

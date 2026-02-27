@@ -1,27 +1,32 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Video {{ letter }}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letter {{ letter }} Video — WordWand</title>
+
     <link rel="stylesheet" href="{% static 'css/chalkboard.css' %}">
 </head>
 
 <body>
     <div class="scene">
         <div class="board">
-            <h1>Watch Video for Letter {{ letter }}</h1>
-            
+            <h1>Watch How to Write {{ letter }}</h1>
+
             <div class="video-container">
+                {% with video_path="videos/Write"|add:letter|add:".mp4" %}
                 <video controls class="letter-video">
-                <source src="{% static 'videos/Write'|add:letter|add:'.mp4' %}" type="video/mp4">
-                Your browser does not support the video tag.
+                    <source src="{% static video_path %}" type="video/mp4">
+                    Your browser does not support the video tag.
                 </video>
+                {% endwith %}
             </div>
-            
+
             <a href="{% url 'letter_trace' letter %}">
                 <button class="chalk-btn">
-                    Skip Video & Start Tracing
+                    ✍ Skip Video &amp; Start Tracing
                 </button>
             </a>
         </div>
