@@ -2,13 +2,11 @@ import os
 import re
 import json
 import time
-
 import cv2
 import nltk
 from nltk.corpus import cmudict, words as english_words
 from gtts import gTTS
 from PyPDF2 import PdfReader
-
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
