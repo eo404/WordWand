@@ -17,6 +17,15 @@
             0%   { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; }
             100% { transform: translate(calc(-50% + 200px), 300px) rotate(360deg); opacity: 0; }
         }
+        /* Required by showStars() in letter_trace.js */
+        @keyframes fadeOut {
+            0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -220%) scale(1.8); }
+        }
+        /* Chalk cursor on the canvas */
+        #canvas {
+            cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='28'%3E%3Crect x='7' y='0' width='6' height='18' rx='3' fill='%23f0ead6' stroke='%23ccc' stroke-width='0.5'/%3E%3Crect x='6' y='17' width='8' height='5' rx='1' fill='%23e8c87a'/%3E%3Cellipse cx='10' cy='24' rx='4' ry='2' fill='%23d4a853'/%3E%3C/svg%3E") 10 26, crosshair;
+        }
     </style>
 </head>
 
@@ -45,6 +54,7 @@
     </div>
 
     <script>
+        // Make letter available to letter_trace.js before it loads
         const currentLetter = "{{ letter }}";
     </script>
     <script src="{% static 'js/letter_trace.js' %}"></script>

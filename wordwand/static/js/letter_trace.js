@@ -1,5 +1,5 @@
 // ===============================
-// WORDWAND TRACE ENGINE 
+// WORDWAND TRACE ENGINE
 // ===============================
 
 const canvas = document.getElementById("canvas");
@@ -13,8 +13,8 @@ let strokes = [];
 let currentStroke = [];
 let letterMask = null;
 
-// Get current letter from URL
-let letter = window.location.pathname.split("/")[2];
+// Letter is injected by the Django template via currentLetter variable
+let letter = typeof currentLetter !== "undefined" ? currentLetter : window.location.pathname.split("/")[2];
 
 // ===============================
 // DRAW LETTER MASK
@@ -26,29 +26,44 @@ function drawLetterMask() {
 
     const fontSize = canvas.height * 0.95;
 
-    ctx.font = `${fontSize}px Arial`;
+    ctx.font = `bold ${fontSize}px Fredoka, sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
 
-    // Filled letter for mask
-    ctx.fillStyle = "#00AEEF";
+    // --- Ghost guide letter (faint chalk on board) ---
+    ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
     ctx.fillText(letter, centerX, centerY);
 
-    // Save mask
-    letterMask = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-    // Guide outline
-    ctx.strokeStyle = "rgba(0, 174, 239, 0.6)";
-    ctx.lineWidth = 10;
+    // Dashed chalk outline guide
+    ctx.save();
+    ctx.setLineDash([14, 10]);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.30)";
+    ctx.lineWidth = 6;
     ctx.strokeText(letter, centerX, centerY);
+    ctx.restore();
 
-    // 🔥 Reset drawing style for user strokes
-    ctx.strokeStyle = "#ff4444";
+    // --- Build mask on offscreen canvas ---
+    const off = document.createElement("canvas");
+    off.width = canvas.width;
+    off.height = canvas.height;
+    const octx = off.getContext("2d");
+    octx.font = ctx.font;
+    octx.textAlign = "center";
+    octx.textBaseline = "middle";
+    octx.fillStyle = "#ffffff";
+    octx.fillText(letter, centerX, centerY);
+
+    letterMask = octx.getImageData(0, 0, canvas.width, canvas.height);
+
+    // --- Reset to chalk stroke style for user drawing ---
+    ctx.setLineDash([]);
+    ctx.strokeStyle = "rgba(240, 234, 214, 0.90)"; // warm chalk white
     ctx.lineWidth = 18;
     ctx.lineCap = "round";
+    ctx.lineJoin = "round";
 }
 
 drawLetterMask();
@@ -63,11 +78,12 @@ canvas.addEventListener("mouseup", stopDraw);
 canvas.addEventListener("mouseleave", stopDraw);
 
 // Touch support
-canvas.addEventListener("touchstart", startDraw);
-canvas.addEventListener("touchmove", drawTouch);
+canvas.addEventListener("touchstart", startDraw, { passive: false });
+canvas.addEventListener("touchmove", drawTouch, { passive: false });
 canvas.addEventListener("touchend", stopDraw);
 
 function startDraw(e) {
+    e.preventDefault();
     drawing = true;
     currentStroke = [];
 
@@ -77,15 +93,18 @@ function startDraw(e) {
 
 function draw(e) {
     if (!drawing) return;
+    e.preventDefault();
 
     const { x, y } = getCoords(e);
-
     const last = currentStroke[currentStroke.length - 1];
 
+    // Chalk texture: slightly vary opacity per segment
+    ctx.globalAlpha = 0.75 + Math.random() * 0.25;
     ctx.beginPath();
     ctx.moveTo(last.x, last.y);
     ctx.lineTo(x, y);
     ctx.stroke();
+    ctx.globalAlpha = 1;
 
     currentStroke.push({ x, y });
 }
@@ -111,10 +130,11 @@ function getCoords(e) {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
+    const src = e.touches ? e.touches[0] : e;
 
     return {
-        x: (e.clientX - rect.left) * scaleX,
-        y: (e.clientY - rect.top) * scaleY
+        x: (src.clientX - rect.left) * scaleX,
+        y: (src.clientY - rect.top) * scaleY
     };
 }
 
@@ -172,7 +192,7 @@ function checkDrawing() {
 
     if (strokes.length === 0) {
         resultText.innerText = "Draw something first 😊";
-        resultText.style.color = "#ff6b6b";
+        resultText.style.color = "#ff8a80";
         return;
     }
 
@@ -180,20 +200,20 @@ function checkDrawing() {
 
     if (score >= 70) {
         resultText.innerText = "Wow! You did it! 🌟";
-        resultText.style.color = "#4CAF50";
+        resultText.style.color = "#a8e6cf";
         showStars();
     }
     else if (score >= 40) {
         resultText.innerText = "Great job! ⭐";
-        resultText.style.color = "#4CAF50";
+        resultText.style.color = "#a8e6cf";
         showStars();
     }
     else {
         resultText.innerText = "Try again 😊";
-        resultText.style.color = "#ff4444";
+        resultText.style.color = "#ff8a80";
     }
 
-    // 🔓 Show back button only after checking
+    // Show back button only after checking
     if (backBtn) {
         backBtn.style.display = "inline-block";
     }
@@ -224,7 +244,7 @@ function retry() {
 // ===============================
 
 function goToAlphabet() {
-    window.location.href = "/letters/grid/";
+    window.location.href = "/alphabetgrid/";
 }
 
 // ===============================
@@ -235,13 +255,14 @@ function showStars() {
 
     const star = document.createElement("div");
     star.innerHTML = "⭐ ⭐ ⭐";
-    star.style.position = "absolute";
+    star.style.position = "fixed";
     star.style.top = "40%";
     star.style.left = "50%";
     star.style.transform = "translate(-50%, -50%)";
-    star.style.fontSize = "40px";
+    star.style.fontSize = "48px";
     star.style.animation = "fadeOut 1.5s forwards";
     star.style.pointerEvents = "none";
+    star.style.zIndex = "999";
 
     document.body.appendChild(star);
 
