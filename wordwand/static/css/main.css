@@ -12,19 +12,22 @@ body {
     background: linear-gradient(
         180deg,
         #f8efd9 0%,
-        #f8efd9 70%,
-        #4ca494 70%,
+        #f8efd9 72%,
+        #4ca494 72%,
         #4ca494 100%
     );
+    display: flex;
+    flex-direction: column;
 }
 
 /* ================= SCENE ================= */
 
 main {
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    padding-bottom: 40px;
 }
 
 /* ================= BUNTING ================= */
@@ -34,33 +37,27 @@ main {
     top: -260px;
     left: 50%;
     transform: translateX(-50%) rotate(2deg);
-
     width: 1400px;
-
     animation: sway 4.5s ease-in-out infinite;
-
-    z-index: 50;   
+    z-index: 50;
     pointer-events: none;
 }
 
 @keyframes sway {
-    0% { transform: translateX(-50%) rotate(-1deg); }
-    50% { transform: translateX(-50%) rotate(1deg); }
+    0%   { transform: translateX(-50%) rotate(-1deg); }
+    50%  { transform: translateX(-50%) rotate(1deg); }
     100% { transform: translateX(-50%) rotate(-1deg); }
 }
 
 /* ================= TEACHER ================= */
 
 .teacher {
-    position:fixed;
+    position: fixed;
     bottom: -100px;
     left: -140px;
-
     height: 520px;
-
     pointer-events: none;
-
-    z-index: 60;   
+    z-index: 60;
 }
 
 /* ================= MAIN BOARD ================= */
@@ -68,22 +65,18 @@ main {
 .main-board {
     width: 95%;
     max-width: 1200px;
-    min-height: 600px;
+    min-height: 560px;
     overflow-y: auto;
-    padding: 70px;
-
+    padding: 60px 70px;
     background: #2c3e50;
     border: 22px solid #b5651d;
     border-radius: 6px;
-
     box-shadow:
         inset 0 0 0 8px #8b4513,
         0 30px 60px rgba(0,0,0,0.4);
-
     position: relative;
     z-index: 5;
 }
-
 
 /* ================= HERO ================= */
 
@@ -91,26 +84,13 @@ main {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 60px;
+    margin-bottom: 50px;
 }
 
-.hero h1 {
-    font-size: 48px;
-    color: white;
-}
-
-.hero span {
-    color: #7fd6c4;
-}
-
-.hero p {
-    color: #e6eef2;
-    margin-top: 10px;
-}
-
-.hero img {
-    width: 250px;
-}
+.hero h1 { font-size: 48px; color: white; line-height: 1.2; }
+.hero span { color: #7fd6c4; display: block; }
+.hero p { color: #e6eef2; margin-top: 10px; font-size: 1.1rem; }
+.hero img { width: 250px; filter: drop-shadow(0 8px 20px rgba(0,0,0,0.2)); }
 
 /* ================= CARDS ================= */
 
@@ -124,11 +104,17 @@ main {
     padding: 25px;
     border-radius: 15px;
     box-shadow: 0 8px 18px rgba(0,0,0,0.15);
-    transition: 0.3s;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-decoration: none;
+    color: #2c3e50;
+    display: block;
+    position: relative;
+    overflow: hidden;
 }
 
 .card:hover {
     transform: translateY(-8px);
+    box-shadow: 0 16px 28px rgba(0,0,0,0.22);
 }
 
 .orange { background: #f5ac3e; }
@@ -136,86 +122,49 @@ main {
 .green  { background: #dff7c2; }
 .purple { background: #f3dfff; }
 
+.card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; }
+.card p  { font-size: 0.9rem; line-height: 1.5; color: #4a5568; }
+
 /* ================= LETTERS PAGE ================= */
 
-.letters-title {
-    font-size: 82px;
-    color: rgb(236, 236, 236);
-    letter-spacing: 6px;
-    margin-bottom: 40px;
-}
+.letters-title { font-size: 82px; color: rgb(236,236,236); letter-spacing: 6px; margin-bottom: 40px; }
 
 .start-btn {
-    background: #f15a5a;
-    color: white;
-    font-size: 32px;
-    padding: 18px 60px;
-    border-radius: 50px;
-    border: none;
-    cursor: pointer;
-    font-weight: 700;
-    box-shadow: 0 8px 0 #c0392b;
+    background: #f15a5a; color: white; font-size: 32px;
+    padding: 18px 60px; border-radius: 50px; border: none;
+    cursor: pointer; font-weight: 700; box-shadow: 0 8px 0 #c0392b;
 }
+.start-btn:hover { transform: translateY(-3px); }
 
-.start-btn:hover {
-    transform: translateY(-3px);
-}
 /* ================= CONTAINER ================= */
-.container {
-    color: white;
-}
 
-.container h2 {
-    text-align: center;
-    margin-bottom: 30px;
-}
+.container { color: white; }
+.container h2 { text-align: center; margin-bottom: 30px; }
+
 /* ================= READING INNER CARD ================= */
 
 .reading-card {
-    background: #f7f7f7;   /* PURE WHITE */
-    border-radius: 20px;
-    padding: 45px;
-    margin: 40px auto;
-    width: 75%;
-    box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+    background: #f7f7f7; border-radius: 20px; padding: 45px;
+    margin: 40px auto; width: 75%; box-shadow: 0 25px 60px rgba(0,0,0,0.35);
 }
 
-/* Upload Section */
-.upload-section {
-    border: 2px dashed #29e9c2;
-    padding: 20px;
-    border-radius: 12px;
-    background: #eaf6ff;
-    text-align: center;
-}
+.upload-section { border: 2px dashed #29e9c2; padding: 20px; border-radius: 12px; background: #eaf6ff; text-align: center; }
 
-/* Text Display */
-.text-display-section {
-    background: #1e83e7;
-    padding: 25px;
-    border-radius: 14px;
-    margin-top: 25px;
-    font-size: 18px;
-    line-height: 1.7;
-}
+.text-display-section { background: #1e83e7; padding: 25px; border-radius: 14px; margin-top: 25px; font-size: 18px; line-height: 1.7; }
 
-/* Buttons */
-.control-panel {
-    margin-top: 25px;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-}
+.control-panel { margin-top: 25px; display: flex; justify-content: center; gap: 20px; }
+.control-panel button { padding: 12px 28px; border-radius: 25px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s ease; }
+.control-panel button:hover { transform: translateY(-3px); }
 
-.control-panel button {
-    padding: 12px 28px;
-    border-radius: 25px;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s ease;
-}
+/* ================= FLASH MESSAGES ================= */
 
-.control-panel button:hover {
-    transform: translateY(-3px);
+.messages {
+    position: fixed; top: 80px; left: 50%;
+    transform: translateX(-50%); z-index: 300;
+    display: flex; flex-direction: column; gap: 8px;
+    width: 90%; max-width: 500px;
 }
+.message { padding: 12px 20px; border-radius: 12px; font-weight: 600; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.12); background: white; color: #2c3e50; }
+.message-success { background: #d4edda; color: #155724; }
+.message-error   { background: #f8d7da; color: #721c24; }
+.message-warning { background: #fff3cd; color: #856404; }

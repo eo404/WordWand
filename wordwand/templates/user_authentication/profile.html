@@ -1,73 +1,94 @@
 {% extends "user_authentication/base_auth.html" %}
+{% load static %}
 
 {% block title %}Profile - WordWand{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="card">
     <div class="card-body">
         <h2 class="card-title">User Profile</h2>
-        
+
         <div class="mb-4">
-            <p class="text-muted">Welcome, <strong>{{ user.username }}</strong>!</p>
+            <p class="text-muted">
+                Welcome, <strong>{{ user.username }}</strong>!
+            </p>
         </div>
-        
+
         <form method="POST">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ next }}">
-            
+
             {% if form.non_field_errors %}
-                <div class="alert alert-danger">
-                    {% for error in form.non_field_errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
             {% endif %}
-            
+
             <div class="mb-3">
                 <label for="id_email" class="form-label">Email Address</label>
                 {{ form.email }}
                 {% if form.email.errors %}
-                    <ul class="errorlist">
-                        {% for error in form.email.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
+                <ul class="errorlist">
+                    {% for error in form.email.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
                 {% endif %}
             </div>
-            
+
             <div class="mb-3">
                 <label for="id_first_name" class="form-label">First Name</label>
                 {{ form.first_name }}
                 {% if form.first_name.errors %}
-                    <ul class="errorlist">
-                        {% for error in form.first_name.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
+                <ul class="errorlist">
+                    {% for error in form.first_name.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
                 {% endif %}
             </div>
-            
+
             <div class="mb-3">
                 <label for="id_last_name" class="form-label">Last Name</label>
                 {{ form.last_name }}
                 {% if form.last_name.errors %}
-                    <ul class="errorlist">
-                        {% for error in form.last_name.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
+                <ul class="errorlist">
+                    {% for error in form.last_name.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
                 {% endif %}
             </div>
-            
-            <button type="submit" class="btn btn-primary">Save Changes</button>
+
+            <div class="profile-actions">
+                <button type="submit" class="btn btn-primary profile-btn">
+                    Save Changes
+                </button>
+
+                <a href="{% url 'home' %}" class="btn btn-outline profile-btn">
+                    ←Homepage
+                </a>
+            </div>
+
+            <hr class="profile-divider">
         </form>
-        
-        <div class="form-link">
-            <form method="POST" action="{% url 'logout' %}" style="display:inline;">
+
+        <div class="logout-wrapper">
+            <form method="POST" action="{% url 'logout' %}">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-link p-0" style="color:#667eea;font-weight:600;">Logout</button>
+                <button type="submit" class="logout-link" style="all:unset; cursor:pointer; color:#667eea; font-weight:600;">
+                    Logout
+                </button>
             </form>
         </div>
     </div>
 </div>
+
 {% endblock %}
+

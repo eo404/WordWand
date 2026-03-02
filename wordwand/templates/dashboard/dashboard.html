@@ -10,9 +10,32 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}?v=3">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
+<script>
+  const heatmapData = JSON.parse(document.getElementById("heatmap-data").textContent);
+  const maxHours = JSON.parse(document.getElementById("max-hours").textContent);
+
+  const container = document.getElementById("heatmap");
+
+  function getColor(hours) {
+    const intensity = hours / maxHours;
+    if (hours === 0) return "#E8E3FF";
+    if (intensity < 0.25) return "#C4B5FD";
+    if (intensity < 0.5) return "#A78BFA";
+    if (intensity < 0.75) return "#8B6FE8";
+    return "#5B3FBF";
+  }
+
+  heatmapData.forEach(day => {
+    const cell = document.createElement("div");
+    cell.classList.add("heatmap-cell");
+    cell.style.backgroundColor = getColor(day.hours);
+    cell.title = `${day.date} — ${day.hours} hours`;
+    container.appendChild(cell);
+  });
+</script>
 
 <body>
 
@@ -21,7 +44,6 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-logo">
-        <div class="logo-icon">📖</div>
         <span class="logo-text">WordWand</span>
       </div>
 
@@ -31,11 +53,10 @@
         <a href="{% url 'home' %}" class="nav-item">Home</a>
 
         <div class="nav-label mt">Account</div>
-        <a href="{% url 'profile' %}?next={% url 'dashboard' %}" class="nav-item">Settings</a>
+        <a href="{% url 'profile' %}?next={% url 'dashboard' %}" class="nav-item">Profile</a>
 
         <form method="POST" action="{% url 'logout' %}" class="logout-form">
-          {% csrf_token %}
-          <button type="submit" class="nav-item logout-btn">Log Out</button>
+          <button type="submit" class="nav-item">Log Out</button>
         </form>
       </nav>
     </aside>
@@ -45,48 +66,65 @@
 
       <header class="topbar">
         <div>
-          <h1>Good morning, {{ user.first_name|default:user.username }} 👋</h1>
+          <h1 id="greeting-message">
+            Good {{ time_greeting }}, {{ user.first_name|default:user.username }} 👋
+          </h1>
           <p>Here's what's happening with your learning today.</p>
         </div>
       </header>
 
+      <!-- Content Wrapper -->
       <div class="content">
 
-        <div class="grid-two">
+        <!-- FULL WIDTH GRID -->
+        <div class="dashboard-grid">
 
-          <!-- Hours Chart -->
+          <!-- Hours Card -->
           <div class="card">
             <div class="card-header">
-              <span class="card-title">Hours Spent This Week</span>
-              <div id="chartLegend" class="chart-legend"></div>
+              <span class="card-title">Learning Activity (Last 12 Months)</span>
             </div>
-            <div class="card-body">
-              {% if chart_courses %}
-              <canvas id="hoursChart" height="180"></canvas>
-              {% else %}
-              <div class="empty-state">No activity data yet.</div>
-              {% endif %}
-            </div>
+          
+            <div class="heatmap-container" id="heatmap"></div>
           </div>
-
-          <!-- Progress Donut -->
+          
+          {{ heatmap_data|json_script:"heatmap-data" }}
+          {{ max_hours|json_script:"max-hours" }}
+          <!-- Progress Card -->
           <div class="card">
             <div class="card-header">
-              <span class="card-title">Progress</span>
+              <span class="card-title">Course Progress</span>
             </div>
             <div class="card-body">
               <div class="donut-wrap">
                 <canvas id="progressChart"></canvas>
                 <div class="donut-label">
+                  {% if user_courses|length > 0 %}
                   <span class="pct">{{ completed_pct }}%</span>
-                  <span class="sub">Done</span>
+                  <span class="sub">Complete</span>
+                  {% else %}
+                  <span class="pct">—</span>
+                  <span class="sub">No Courses</span>
+                  {% endif %}
                 </div>
               </div>
+
+              {% if user_courses|length > 0 %}
+              <div class="donut-summary">
+                <span class="summary-item">
+                  <span class="dot" style="background: #5B3FBF;"></span>
+                  {{ completed }} Completed
+                </span>
+                <span class="summary-item">
+                  <span class="dot" style="background: #C4B5FD;"></span>
+                  {{ in_progress }} In Progress
+                </span>
+              </div>
+              {% endif %}
             </div>
           </div>
 
         </div>
-
       </div>
     </div>
   </div>
@@ -95,24 +133,7 @@
   {{ days|json_script:"days-data" }}
   {{ completed_pct|json_script:"completed-pct-data" }}
   {{ in_progress_pct|json_script:"inprogress-pct-data" }}
-  
-  <script>
-    const chartCoursesRaw = JSON.parse(
-      document.getElementById("chart-courses-data").textContent
-    );
-
-    const days = JSON.parse(
-      document.getElementById("days-data").textContent
-    );
-
-    const completedPct = JSON.parse(
-      document.getElementById("completed-pct-data").textContent
-    );
-
-    const inProgressPct = JSON.parse(
-      document.getElementById("inprogress-pct-data").textContent
-    );
-  </script>
+  {{ time_greeting|json_script:"time-greeting-data" }}
 
   <script src="{% static 'js/dashboard.js' %}"></script>
 

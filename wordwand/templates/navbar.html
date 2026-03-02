@@ -1,35 +1,169 @@
 {% load static %}
-<nav class="pill-navbar">
 
-    <!-- Left: Logo -->
-    <div class="nav-left">
+<nav class="top-nav">
+
+    <!-- Left: Brand -->
+    <div class="top-nav-brand">
         <div class="logo-circle">
             <i class="fa-solid fa-graduation-cap"></i>
         </div>
+        <span class="nav-brand-text">WordWand</span>
     </div>
 
-    <!-- Center: Brand -->
-    <div class="nav-center">
-        WordWand
-    </div>
-
-    <!-- Right: Nav actions -->
-    <div class="nav-right">
+    <!-- Right: Buttons -->
+    <div class="top-nav-actions">
         {% if user.is_authenticated %}
-            <a href="{% url 'dashboard' %}" class="pill nav-green">
+            <a href="{% url 'dashboard' %}" class="nav-btn btn-dashboard">
                 <i class="fa-solid fa-gauge"></i> Dashboard
             </a>
-            <a href="{% url 'profile' %}?next={{ request.path }}" class="pill blue">
-                <i class="fa-solid fa-user"></i> {{ user.username }}
+            <a href="{% url 'profile' %}?next={{ request.path }}" class="nav-btn btn-profile">
+                <div class="avatar-dot">{{ user.username|first|upper }}</div>
+                <span>{{ user.username }}</span>
             </a>
         {% else %}
-            <a href="{% url 'login' %}" class="pill blue">
+            <a href="{% url 'login' %}" class="nav-btn btn-login">
                 <i class="fa-solid fa-right-to-bracket"></i> Login
             </a>
-            <a href="{% url 'register' %}" class="pill nav-green">
+            <a href="{% url 'register' %}" class="nav-btn btn-signup">
                 <i class="fa-solid fa-user-plus"></i> Sign Up
             </a>
         {% endif %}
     </div>
 
 </nav>
+
+<style>
+/* ══════════════════════════════════════════
+   TOP NAV — transparent, above the scene
+   Sits in normal flow ABOVE <main>
+   so it never overlaps the bunting
+══════════════════════════════════════════ */
+
+.top-nav {
+    /* Normal flow — pushes content down, no overlap */
+    position: relative;
+    z-index: 100;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    /* Sits just inside the wall area above the board */
+    max-width: 1200px;
+    width: 95%;
+    margin: 0 auto;
+    padding: 16px 0 10px;
+
+    /* Fully transparent — wall colour shows through */
+    background: transparent;
+}
+
+/* ── Brand ── */
+.top-nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.logo-circle {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2c3e50 0%, #4ca494 100%);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1rem;
+    box-shadow: 0 3px 10px rgba(44,62,80,0.22);
+    flex-shrink: 0;
+}
+
+.nav-brand-text {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.6rem; font-weight: 700;
+    letter-spacing: 0.5px;
+    /* Dark text on cream wall */
+    color: #3a3a3a;
+}
+
+/* ── Right action area ── */
+.top-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ── Base button ── */
+.nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 20px;
+    border-radius: 999px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 0.98rem; font-weight: 600;
+    text-decoration: none; border: none; cursor: pointer;
+    letter-spacing: 0.3px; white-space: nowrap;
+    transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1),
+                box-shadow 0.15s ease;
+}
+.nav-btn:hover  { transform: translateY(-2px); }
+.nav-btn:active { transform: translateY(1px) scale(0.97); }
+.nav-btn i { font-size: 0.9rem; }
+
+/* Dashboard — teal */
+.btn-dashboard {
+    background: linear-gradient(135deg, #4ca494, #3a8a7a);
+    color: white;
+    box-shadow: 0 4px 0 #2a6b5e, 0 6px 16px rgba(76,164,148,0.28);
+}
+.btn-dashboard:hover {
+    background: linear-gradient(135deg, #3d9484, #2e7d6e);
+    box-shadow: 0 2px 0 #2a6b5e, 0 8px 20px rgba(76,164,148,0.38);
+    color: white;
+}
+
+/* Profile — dark slate */
+.btn-profile {
+    background: #2c3e50;
+    color: white;
+    box-shadow: 0 4px 0 #1a252f, 0 6px 16px rgba(44,62,80,0.25);
+    padding: 5px 18px 5px 5px;
+    gap: 9px;
+}
+.btn-profile:hover {
+    background: #374f63;
+    box-shadow: 0 2px 0 #1a252f, 0 8px 20px rgba(44,62,80,0.35);
+    color: white;
+}
+.avatar-dot {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4ca494, #7fd6c4);
+    color: #1a2f3a; font-size: 0.88rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Login — outlined on cream */
+.btn-login {
+    background: transparent;
+    color: #2c3e50;
+    border: 2px solid rgba(44,62,80,0.3);
+}
+.btn-login:hover {
+    background: rgba(44,62,80,0.06);
+    border-color: rgba(44,62,80,0.5);
+    color: #2c3e50;
+}
+
+/* Sign Up — amber */
+.btn-signup {
+    background: linear-gradient(135deg, #f5ac3e, #e8942a);
+    color: white;
+    box-shadow: 0 4px 0 #c07010, 0 6px 16px rgba(245,172,62,0.28);
+}
+.btn-signup:hover {
+    background: linear-gradient(135deg, #e89a2a, #d4831a);
+    box-shadow: 0 2px 0 #c07010, 0 8px 20px rgba(245,172,62,0.38);
+    color: white;
+}
+</style>

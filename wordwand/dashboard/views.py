@@ -1,57 +1,63 @@
-from django.shortcuts import render
+from collections import defaultdict
+from datetime import date, datetime, timedelta
 from django.contrib.auth.decorators import login_required
-from django.utils import timezone
-from datetime import timedelta, date
+from django.db.models import Sum
+from django.shortcuts import render
 
-from .models import Course, UserCourse, ScheduledClass, Assignment, DailyActivity
+from .models import DailyActivity
 
 
 @login_required
 def dashboard_view(request):
     user = request.user
     today = date.today()
-    week_start = today - timedelta(days=today.weekday())
+    one_year_ago = today - timedelta(days=364)
 
-    # --- Enrolled courses summary ---
-    user_courses = UserCourse.objects.filter(user=user).select_related('course')
+    # Greeting
+    current_hour = datetime.now().hour
+    if 5 <= current_hour < 12:
+        time_greeting = 'morning'
+    elif 12 <= current_hour < 17:
+        time_greeting = 'afternoon'
+    elif 17 <= current_hour < 21:
+        time_greeting = 'evening'
+    else:
+        time_greeting = 'night'
 
-    # --- Today's / upcoming schedule ---
-    schedule = ScheduledClass.objects.filter(
-        user=user, scheduled_date__gte=today
-    ).select_related('course').order_by('scheduled_date', 'scheduled_time')[:5]
+    # --- HEATMAP DATA (Last 365 days) ---
+    activities = (
+        DailyActivity.objects
+        .filter(user=user)
+        .values('week_start', 'day_of_week')
+        .annotate(total_hours=Sum('hours'))
+    )
 
-    # --- Assignments ---
-    assignments = Assignment.objects.filter(user=user).select_related('course')
+    # Convert weekly stored format → real date
+    activity_map = defaultdict(float)
 
-    # --- Progress summary ---
-    total = user_courses.count()
-    completed = user_courses.filter(is_completed=True).count()
-    in_progress = total - completed
-    completed_pct = round((completed / total * 100)) if total else 0
-    in_progress_pct = 100 - completed_pct
+    for entry in activities:
+        actual_date = entry['week_start'] + \
+            timedelta(days=entry['day_of_week'])
+        activity_map[actual_date] += float(entry['total_hours'])
 
-    # --- Chart data: hours per day per course (current week) ---
-    days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    activity_qs = DailyActivity.objects.filter(
-        user=user, week_start=week_start
-    ).select_related('course')
+    # Build full 365 day grid
+    heatmap_data = []
+    current_date = one_year_ago
+    max_hours = 0
 
-    # Build dict: {course_title: [hours per day]}
-    chart_courses = {}
-    for entry in activity_qs:
-        title = entry.course.title
-        if title not in chart_courses:
-            chart_courses[title] = [0] * 7
-        chart_courses[title][entry.day_of_week] = entry.hours
+    while current_date <= today:
+        hours = activity_map.get(current_date, 0)
+        heatmap_data.append({
+            "date": current_date.strftime("%Y-%m-%d"),
+            "hours": round(hours, 2)
+        })
+        max_hours = max(max_hours, hours)
+        current_date += timedelta(days=1)
 
     context = {
-        'user_courses': user_courses,
-        'schedule': schedule,
-        'assignments': assignments,
-        'completed_pct': completed_pct,
-        'in_progress_pct': in_progress_pct,
-        'days': days,
-        'chart_courses': chart_courses,
-        'today': today,
+        "heatmap_data": heatmap_data,
+        "max_hours": max_hours if max_hours > 0 else 1,
+        "time_greeting": time_greeting,
     }
-    return render(request, 'dashboard/dashboard.html', context)
+
+    return render(request, "dashboard/dashboard.html", context)

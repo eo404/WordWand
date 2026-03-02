@@ -14,6 +14,7 @@
 
     <!-- TTS popup/syllable animations -->
     <link rel="stylesheet" href="{% static 'css/tts_engine.css' %}">
+    <link rel="stylesheet" href="{% static 'css/home_button.css' %}">
 
     <style>
         /* ─── BOARD INNER LAYOUT ───────────────────────────── */
@@ -361,7 +362,7 @@
 </head>
 
 <body>
-
+    <a href="{% url 'home' %}" class="home-btn">Home</a>
     <!-- ── BUNTING IMAGE (from static/images/banner.png) ── -->
     <img src="{% static 'images/banner.png' %}" class="bunting" alt="">
 

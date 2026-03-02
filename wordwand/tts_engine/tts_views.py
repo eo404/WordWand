@@ -55,6 +55,7 @@ COMMON_WORDS = {
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def split_into_syllables(word):
     """Return a hyphen-separated syllable breakdown for a word."""
     word = re.sub(r"[^\w]", "", word.lower().strip())
@@ -200,9 +201,11 @@ def reader(request):
 
         # Hard-word detection
         words_raw = re.findall(r"\b[\w']+\b", text)
-        hard_words = [w.lower() for w in words_raw if is_hard(re.sub(r"[^\w]", "", w.lower()))]
+        hard_words = [w.lower() for w in words_raw if is_hard(
+            re.sub(r"[^\w]", "", w.lower()))]
         unique_hard_words = sorted(set(hard_words))
-        word_syllables = {w: split_into_syllables(w) for w in unique_hard_words}
+        word_syllables = {w: split_into_syllables(
+            w) for w in unique_hard_words}
 
         processing_time = round(time.time() - start_time, 2)
 
@@ -215,6 +218,22 @@ def reader(request):
             file_type=file_ext,
             processing_time=processing_time,
         )
+
+        # Keep only the latest 5 audio files per user and delete older ones
+        user_requests = TTSRequest.objects.filter(
+            user=request.user).order_by('-created_at')
+        if user_requests.count() > 5:
+            # Get the requests to delete (all except the latest 5)
+            requests_to_delete = user_requests[5:]
+            for request_obj in requests_to_delete:
+                # Delete the audio file from storage
+                if request_obj.audio_file:
+                    audio_file_path = os.path.join(
+                        media_dir, str(request_obj.audio_file))
+                    if os.path.exists(audio_file_path):
+                        os.remove(audio_file_path)
+                # Delete the database record
+                request_obj.delete()
 
         context.update({
             "text": text,

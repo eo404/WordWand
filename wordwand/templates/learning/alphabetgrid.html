@@ -8,13 +8,17 @@
     <title>WordWand – Alphabet Grid</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/alphabetgrid.css' %}">
+    <link rel="stylesheet" href="{% static 'css/alphabetgrid.css' %}?v=3">
 </head>
 
 <body>
 
+    <!-- Home Button (Moved Outside Board) -->
+    <a href="{% url 'home' %}" class="home-btn">Home</a>
+
     <div class="scene">
         <div class="board">
+
             <h1>Choose a Letter</h1>
 
             <div class="alphabet-grid">
@@ -24,6 +28,7 @@
                 </a>
                 {% endfor %}
             </div>
+
         </div>
     </div>
 
@@ -32,23 +37,22 @@
     </audio>
 
     <script>
-        // Play click sound before navigating
-        document.querySelectorAll(".letter-btn").forEach(function(btn) {
-            btn.addEventListener("click", function(e) {
+        document.querySelectorAll(".letter-btn").forEach(function (btn) {
+            btn.addEventListener("click", function (e) {
                 const sound = document.getElementById("clickSound");
                 if (sound) {
                     e.preventDefault();
                     const href = this.href;
                     sound.currentTime = 0;
-                    sound.play().catch(function() {}).finally(function() {
+                    sound.play().catch(function () { }).finally(function () {
                         window.location.href = href;
                     });
-                    // Fallback in case play() hangs
-                    setTimeout(function() { window.location.href = href; }, 300);
+                    setTimeout(function () { window.location.href = href; }, 300);
                 }
             });
         });
     </script>
 
 </body>
+
 </html>

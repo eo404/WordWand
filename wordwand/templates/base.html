@@ -17,12 +17,12 @@
 
 <body>
 
-    <!-- Navbar -->
-    {% include "navbar.html" %}
+    <!-- Global Decorations (fixed, behind everything) -->
+    <img src="{% static 'images/banner.png' %}" class="bunting" alt="">
+    <img src="{% static 'images/teacher.png' %}" class="teacher" alt="">
 
-    <!-- Global Decorations -->
-    <img src="{% static 'images/banner.png' %}" class="bunting">
-    <img src="{% static 'images/teacher.png' %}" class="teacher">
+    <!-- Navbar — normal flow, sits above the board, below bunting visually -->
+    {% include "navbar.html" %}
 
     <!-- Flash Messages -->
     {% if messages %}
