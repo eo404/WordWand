@@ -5,7 +5,6 @@
 <div class="main-board game-board">
     {% include "games/game_topbar.html" with game_title="Word Builder" game_emoji="🧩" %}
 
-
     <div class="progress-strip">
         <span class="ps-label">🧩 Word Builder</span>
         <div class="ps-track"><div class="ps-fill" data-width="{{ progress.accuracy|default:0 }}"></div></div>
@@ -24,10 +23,12 @@
             <img src="{{ word.image_path.url }}" alt="{{ word.word_text }}">
         </div>
         {% endif %}
+
         {% if word.audio_file %}
         <audio id="wordAudio" src="{{ word.audio_file.url }}" preload="auto"></audio>
         {% endif %}
-        <button class="wb-hear-btn" onclick="playWord()" title="Hear the word">
+
+        <button class="wb-hear-btn" id="hearBtn" onclick="playWord()">
             🔊 <span>Hear Word</span>
         </button>
     </div>
@@ -76,10 +77,12 @@
     </div>
 </div>
 
-<!-- Store Django template values in data attributes -->
+<!-- Page data -->
 <script type="application/json" id="pageData">
 {
-    "word_id": {{ word.id }},
+    "word_id":    {{ word.id }},
+    "word_text":  "{{ word.word_text }}",
+    "has_audio":  {% if word.audio_file %}true{% else %}false{% endif %},
     "csrf_token": "{{ csrf_token }}",
     "submit_url": "{% url 'word_builder_submit' %}"
 }
@@ -105,16 +108,20 @@
     background:rgba(255,255,255,0.1); border:2px solid rgba(255,255,255,0.25);
     color:rgba(240,234,214,0.88); border-radius:12px; cursor:pointer;
     font-family:'Fredoka',sans-serif; font-size:1rem; font-weight:600;
-    padding:10px 20px; transition:background 0.15s;
+    padding:10px 20px; transition:background 0.15s, transform 0.15s;
 }
-.wb-hear-btn:hover { background:rgba(255,255,255,0.18); }
+.wb-hear-btn:hover  { background:rgba(255,255,255,0.18); transform:translateY(-2px); }
+.wb-hear-btn:active { transform:scale(0.96); }
+.wb-hear-btn.playing {
+    background:linear-gradient(135deg,#4ca494,#2e7d6e);
+    border-color:transparent; color:white;
+}
 
 .wb-drop-label {
     font-family:'Patrick Hand',cursive;
     color:rgba(255,255,255,0.45); text-align:center;
     font-size:0.95rem; margin-bottom:12px;
 }
-
 .wb-slots {
     display:flex; justify-content:center; flex-wrap:wrap;
     gap:10px; margin-bottom:24px; min-height:80px;
@@ -165,172 +172,196 @@
 </style>
 
 <script>
-// Apply width from data attribute and set up menu buttons
 document.addEventListener('DOMContentLoaded', function() {
+
+    // ── Page data ──────────────────────────────────────────────
+    const pageData   = JSON.parse(document.getElementById('pageData').textContent);
+    const WORD_ID    = pageData.word_id;
+    const WORD_TEXT  = pageData.word_text;
+    const HAS_AUDIO  = pageData.has_audio;
+    const CSRF_TOKEN = pageData.csrf_token;
+    const SUBMIT_URL = pageData.submit_url;
+    const startTime  = Date.now();
+    let   draggedTile = null;
+
+    // Progress bar
     const fill = document.querySelector('.ps-fill[data-width]');
-    if (fill) {
-        fill.style.width = fill.dataset.width + '%';
+    if (fill) fill.style.width = fill.dataset.width + '%';
+
+    // ── Hear Word ─────────────────────────────────────────────
+    // FIX: falls back to browser SpeechSynthesis when no audio file is uploaded
+    window.playWord = function() {
+        const btn = document.getElementById('hearBtn');
+        btn.classList.add('playing');
+        btn.querySelector('span').textContent = 'Playing…';
+
+        const audioEl = document.getElementById('wordAudio');
+
+        if (HAS_AUDIO && audioEl) {
+            // Use real uploaded audio
+            audioEl.currentTime = 0;
+            audioEl.play();
+            audioEl.onended = () => {
+                btn.classList.remove('playing');
+                btn.querySelector('span').textContent = 'Hear Word';
+            };
+        } else {
+            // Fallback: browser TTS — works with zero uploads
+            speechSynthesis.cancel();
+            const u  = new SpeechSynthesisUtterance(WORD_TEXT);
+            u.rate   = 0.85;
+            u.lang   = 'en-US';
+            u.onend  = () => {
+                btn.classList.remove('playing');
+                btn.querySelector('span').textContent = 'Hear Word';
+            };
+            speechSynthesis.speak(u);
+        }
+    };
+
+    // ── Drag & Drop ───────────────────────────────────────────
+    window.dragStart = function(e) {
+        draggedTile = e.target;
+        e.dataTransfer.setData('text', e.target.dataset.letter);
+        setTimeout(() => e.target.style.opacity = '0.35', 0);
+    };
+
+    document.addEventListener('dragend', e => {
+        if (e.target.classList.contains('wb-tile')) e.target.style.opacity = '';
+    });
+
+    window.allowDrop = function(e) {
+        e.preventDefault();
+        e.currentTarget.classList.add('drag-over');
+    };
+
+    document.addEventListener('dragleave', e => {
+        if (e.target.classList && e.target.classList.contains('wb-slot'))
+            e.target.classList.remove('drag-over');
+    });
+
+    window.dropLetter = function(e, slot) {
+        e.preventDefault();
+        slot.classList.remove('drag-over');
+        if (slot.querySelector('.slot-char').textContent) return;
+        const letter = e.dataTransfer.getData('text');
+        if (!letter && !draggedTile) return;
+        const src = draggedTile || document.querySelector(`[data-letter="${letter}"]:not(.used)`);
+        if (src) fillSlot(slot, src);
+        draggedTile = null;
+    };
+
+    // ── Tap to place ──────────────────────────────────────────
+    window.tapTile = function(tile) {
+        if (tile.classList.contains('used')) return;
+        const firstEmpty = Array.from(document.querySelectorAll('.wb-slot'))
+            .find(s => !s.querySelector('.slot-char').textContent);
+        if (firstEmpty) fillSlot(firstEmpty, tile);
+    };
+
+    function fillSlot(slot, tile) {
+        slot.querySelector('.slot-char').textContent = tile.dataset.letter;
+        slot.querySelector('.slot-remove').classList.remove('hidden');
+        slot.classList.add('filled');
+        tile.classList.add('used');
     }
-    // Set up menu button
-    const menuBtn = document.querySelector('button[data-href]');
-    if (menuBtn) {
-        menuBtn.addEventListener('click', function() {
-            window.location = this.dataset.href;
+
+    window.removeFromSlot = function(btn) {
+        const slot   = btn.closest('.wb-slot');
+        const letter = slot.querySelector('.slot-char').textContent;
+        slot.querySelector('.slot-char').textContent = '';
+        slot.querySelector('.slot-remove').classList.add('hidden');
+        slot.classList.remove('filled', 'correct', 'wrong');
+        const tile = Array.from(document.querySelectorAll('.wb-tile.used'))
+            .find(t => t.dataset.letter === letter);
+        if (tile) tile.classList.remove('used');
+    };
+
+    window.resetWord = function() {
+        document.querySelectorAll('.wb-slot').forEach(s => {
+            s.querySelector('.slot-char').textContent = '';
+            s.querySelector('.slot-remove').classList.add('hidden');
+            s.classList.remove('filled', 'correct', 'wrong', 'drag-over');
+        });
+        document.querySelectorAll('.wb-tile').forEach(t => {
+            t.classList.remove('used');
+            t.style.opacity = '';
+        });
+    };
+
+    // ── Check Answer ──────────────────────────────────────────
+    window.checkWord = async function() {
+        const slots     = Array.from(document.querySelectorAll('.wb-slot'));
+        const submitted = slots.map(s => s.querySelector('.slot-char').textContent.trim());
+
+        if (submitted.some(l => !l)) { shakeMissing(slots); return; }
+
+        const rt  = (Date.now() - startTime) / 1000;
+        const res = await fetch(SUBMIT_URL, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+            body:    JSON.stringify({ word_id: WORD_ID, submitted_order: submitted, response_time: rt })
+        });
+        const data = await res.json();
+
+        slots.forEach((slot, i) => {
+            slot.classList.add(
+                submitted[i].toLowerCase() === data.correct_order[i].toLowerCase()
+                    ? 'correct' : 'wrong'
+            );
+        });
+
+        if (data.correct) {
+            playWord();
+            showStars();
+        }
+
+        setTimeout(() => {
+            document.getElementById('rEmoji').textContent = data.correct ? '🎉' : '💪';
+            document.getElementById('rTitle').textContent = data.correct ? 'Perfect Spelling!' : 'Not quite!';
+            document.getElementById('rSub').textContent   = data.correct
+                ? 'You built it perfectly!'
+                : 'Correct order: ' + data.correct_order.join(' · ');
+            document.getElementById('resultOverlay').classList.remove('hidden');
+        }, 900);
+    };
+
+    window.closeResult = function() {
+        document.getElementById('resultOverlay').classList.add('hidden');
+        resetWord();
+    };
+
+    function shakeMissing(slots) {
+        slots.forEach(s => {
+            if (!s.querySelector('.slot-char').textContent)
+                s.style.animation = 'shake 0.4s ease';
+        });
+        setTimeout(() => slots.forEach(s => s.style.animation = ''), 500);
+    }
+
+    function showStars() {
+        ['⭐','🌟','✨'].forEach((s, i) => {
+            const el = document.createElement('div');
+            el.textContent = s;
+            el.style.cssText = `position:fixed;font-size:2.5rem;top:${30+i*8}%;left:${20+i*30}%;
+                animation:starFloat 1.2s ease forwards;pointer-events:none;z-index:99999;`;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 1400);
         });
     }
+
+    // Animations
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `
+        @keyframes starFloat {
+            from { transform:translateY(0) scale(0); opacity:1; }
+            to   { transform:translateY(-120px) scale(1.5); opacity:0; }
+        }
+        @keyframes shake {
+            0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)}
+        }`;
+    document.head.appendChild(styleEl);
+
 });
-</script>
-
-<script>
-// Load data from JSON script block
-const pageDataEl = document.getElementById('pageData');
-const pageData = JSON.parse(pageDataEl.textContent);
-const WORD_ID    = pageData.word_id;
-const CSRF_TOKEN = pageData.csrf_token;
-const SUBMIT_URL = pageData.submit_url;
-let draggedTile  = null;
-let lastTapped   = null;
-const startTime  = Date.now();
-
-/* ─── Drag & Drop ─── */
-function dragStart(e) {
-    draggedTile = e.target;
-    e.dataTransfer.setData('text', e.target.dataset.letter);
-    setTimeout(() => e.target.style.opacity = '0.35', 0);
-}
-document.addEventListener('dragend', e => { if(e.target.classList.contains('wb-tile')) e.target.style.opacity = ''; });
-
-function allowDrop(e) {
-    e.preventDefault();
-    e.currentTarget.classList.add('drag-over');
-}
-document.querySelectorAll && document.addEventListener('dragleave', e => {
-    if(e.target.classList && e.target.classList.contains('wb-slot'))
-        e.target.classList.remove('drag-over');
-});
-
-function dropLetter(e, slot) {
-    e.preventDefault();
-    slot.classList.remove('drag-over');
-    if (slot.querySelector('.slot-char').textContent) return; // already filled
-    const letter = e.dataTransfer.getData('text');
-    if (!letter && !draggedTile) return;
-    const selector = '[data-letter="' + letter + '"]:not(.used)';
-    fillSlot(slot, draggedTile || document.querySelector(selector));
-    draggedTile = null;
-}
-
-/* ─── Tap to place (mobile-friendly) ─── */
-function tapTile(tile) {
-    if (tile.classList.contains('used')) return;
-    const firstEmpty = Array.from(document.querySelectorAll('.wb-slot'))
-        .find(s => !s.querySelector('.slot-char').textContent);
-    if (firstEmpty) fillSlot(firstEmpty, tile);
-}
-
-function fillSlot(slot, tile) {
-    slot.querySelector('.slot-char').textContent = tile.dataset.letter;
-    slot.querySelector('.slot-remove').classList.remove('hidden');
-    slot.classList.add('filled');
-    slot.dataset.tileRef = tile.dataset.letter;
-    tile.classList.add('used');
-}
-
-function removeFromSlot(btn) {
-    const slot   = btn.closest('.wb-slot');
-    const letter = slot.querySelector('.slot-char').textContent;
-    slot.querySelector('.slot-char').textContent = '';
-    slot.querySelector('.slot-remove').classList.add('hidden');
-    slot.classList.remove('filled','correct','wrong');
-    // Re-enable matching tile
-    const tile = Array.from(document.querySelectorAll('.wb-tile.used'))
-        .find(t => t.dataset.letter === letter);
-    if (tile) tile.classList.remove('used');
-}
-
-function resetWord() {
-    document.querySelectorAll('.wb-slot').forEach(s => {
-        s.querySelector('.slot-char').textContent = '';
-        s.querySelector('.slot-remove').classList.add('hidden');
-        s.classList.remove('filled','correct','wrong','drag-over');
-    });
-    document.querySelectorAll('.wb-tile').forEach(t => { t.classList.remove('used'); t.style.opacity = ''; });
-}
-
-async function checkWord() {
-    const slots = Array.from(document.querySelectorAll('.wb-slot'));
-    const submitted = slots.map(s => s.querySelector('.slot-char').textContent.trim());
-    if (submitted.some(l => !l)) {
-        shakeMissing(slots); return;
-    }
-    const rt  = (Date.now() - startTime) / 1000;
-    const res = await fetch(SUBMIT_URL, {
-        method:'POST',
-        headers:{'Content-Type':'application/json','X-CSRFToken':CSRF_TOKEN},
-        body: JSON.stringify({ word_id: WORD_ID, submitted_order: submitted, response_time: rt })
-    });
-    const data = await res.json();
-
-    slots.forEach((slot, i) => {
-        slot.classList.add(submitted[i] === data.correct_order[i] ? 'correct' : 'wrong');
-    });
-
-    if (data.correct) {
-        playWord();
-        const audio2 = new Audio(); audio2.src=''; // placeholder success sound
-        showStars();
-    }
-
-    setTimeout(() => {
-        document.getElementById('rEmoji').textContent = data.correct ? '🎉' : '💪';
-        document.getElementById('rTitle').textContent = data.correct ? 'Perfect Spelling!' : 'Not quite!';
-        document.getElementById('rSub').textContent   = data.correct
-            ? 'You built it perfectly!'
-            : 'Correct order: ' + data.correct_order.join(' · ');
-        document.getElementById('resultOverlay').classList.remove('hidden');
-    }, 900);
-}
-
-function shakeMissing(slots) {
-    slots.forEach(s => {
-        if (!s.querySelector('.slot-char').textContent)
-            s.style.animation = 'shake 0.4s ease';
-    });
-    setTimeout(() => slots.forEach(s => s.style.animation = ''), 500);
-}
-
-function showStars() {
-    const stars = ['⭐','🌟','✨'];
-    stars.forEach((s, i) => {
-        const el = document.createElement('div');
-        el.textContent = s; el.className = 'floating-star';
-        el.style.cssText = `position:fixed;font-size:2.5rem;top:${30+i*8}%;left:${20+i*30}%;
-            animation:starFloat 1.2s ease forwards;pointer-events:none;z-index:99999;`;
-        document.body.appendChild(el);
-        setTimeout(() => el.remove(), 1400);
-    });
-}
-
-function closeResult() {
-    document.getElementById('resultOverlay').classList.add('hidden');
-    resetWord();
-}
-
-function playWord() {
-    const a = document.getElementById('wordAudio');
-    if (a) { a.currentTime=0; a.play(); }
-}
-
-// Add star animation
-const style = document.createElement('style');
-style.textContent = `
-@keyframes starFloat {
-    from { transform:translateY(0) scale(0); opacity:1; }
-    to   { transform:translateY(-120px) scale(1.5); opacity:0; }
-}
-@keyframes shake {
-    0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)}
-}`;
-document.head.appendChild(style);
 </script>
 {% endblock %}

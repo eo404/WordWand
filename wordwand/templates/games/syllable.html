@@ -5,40 +5,34 @@
 <div class="main-board game-board">
     {% include "games/game_topbar.html" with game_title="Syllable Breaker" game_emoji="✂️" %}
 
-
     <div class="progress-strip">
         <span class="ps-label">✂️ Syllable Breaker</span>
-        <div class="ps-track"><div class="ps-fill" style="width:{{ progress.accuracy|default:0 }}%"></div></div>
+        <div class="ps-track"><div class="ps-fill" data-width="{{ progress.accuracy|default:0 }}"></div></div>
         <span class="ps-badge">Level {{ progress.level|default:1 }} · {{ progress.accuracy|default:0|floatformat:0 }}%</span>
     </div>
 
     <div class="instruct">
         <span class="instruct-icon">✂️</span>
-        <span>Tap the word to clap out its syllables, then drag to split it!</span>
+        <span>Tap the letters to split the word into syllables!</span>
     </div>
 
-    <!-- The big word display -->
+    <!-- Big word + hear button -->
     <div class="sy-word-stage">
-        <div class="sy-display-word" id="displayWord">{{ syllable_word.word }}</div>
+        <div class="sy-display-word" id="displayWord" onclick="clapWord()">
+            {{ syllable_word.word }}
+        </div>
+
         {% if syllable_word.audio_file %}
         <audio id="wordAudio" src="{{ syllable_word.audio_file.url }}" preload="auto"></audio>
         {% endif %}
-        <button class="g-btn g-btn-teal" style="margin-top:14px;" onclick="playWord()">🔊 Hear It</button>
+
+        <button class="sy-hear-btn" id="hearBtn" onclick="playWord()">
+            🔊 <span>Hear It</span>
+        </button>
     </div>
 
-    <!-- Syllable drop zone -->
-    <p class="sy-label">Drag to split into syllables:</p>
-    <div class="sy-split-zone" id="splitZone">
-        <div class="sy-source-tile" id="sourceTile"
-             draggable="true"
-             ondragstart="dragStart(event)">
-            {{ syllable_word.word }}
-        </div>
-        <div class="sy-divider-hint">drag the word, then tap ✂️ between syllables</div>
-    </div>
-
-    <!-- Tap-to-split approach (simpler, mobile-first) -->
-    <p class="sy-label" style="margin-top:20px;">Or tap the letters to split:</p>
+    <!-- Tap-to-split letter zone -->
+    <p class="sy-label">Tap between letters to mark where syllables split:</p>
     <div class="sy-tap-zone" id="tapZone">
         {% for char in syllable_word.word %}
         <span class="sy-char" data-index="{{ forloop.counter0 }}"
@@ -46,12 +40,13 @@
         {% endfor %}
     </div>
 
+    <!-- Live preview bubbles -->
     <div class="sy-user-result" id="userResult"></div>
 
     <div style="display:flex;justify-content:center;gap:12px;margin-top:24px;flex-wrap:wrap;">
         <button class="g-btn g-btn-teal"  onclick="checkSyllables()">✅ Check</button>
         <button class="g-btn g-btn-ghost" onclick="resetSplit()">↩ Reset</button>
-        <button class="g-btn g-btn-ghost" onclick="window.location='{% url "menu" %}'">Menu</button>
+         <button class="g-btn g-btn-ghost" data-href="{% url 'menu' %}">Menu</button>
     </div>
 
 </div>
@@ -69,179 +64,273 @@
     </div>
 </div>
 
+<!-- Page data -->
+<script type="application/json" id="pageData">
+{
+    "word_id":   {{ syllable_word.id }},
+    "word_text": "{{ syllable_word.word }}",
+    "has_audio": {% if syllable_word.audio_file %}true{% else %}false{% endif %},
+    "correct_syls": {{ syllable_word.syllable_structure|safe }},
+    "csrf_token": "{{ csrf_token }}",
+    "submit_url": "{% url 'syllable_submit' %}"
+}
+</script>
+
 <style>
 @import url("{% static 'css/_shared.css' %}");
 
+/* ── Word stage ── */
 .sy-word-stage {
-    text-align:center; margin-bottom:28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
 }
+
 .sy-display-word {
-    font-family:'Fredoka',sans-serif;
-    font-size:4.5rem; font-weight:700;
-    color:rgba(240,234,214,0.94); letter-spacing:4px;
-    text-shadow:3px 3px 0 rgba(0,0,0,0.3);
-    cursor:pointer;
-    transition:transform 0.15s;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 4.5rem;
+    font-weight: 700;
+    color: rgba(240, 234, 214, 0.94);
+    letter-spacing: 4px;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: transform 0.15s;
+    user-select: none;
 }
-.sy-display-word:hover { transform:scale(1.04); }
+.sy-display-word:hover  { transform: scale(1.04); }
+.sy-display-word.clap   { transform: scale(0.92); }
 
+/* ── Hear button ── */
+.sy-hear-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.25);
+    color: rgba(240,234,214,0.88);
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 10px 22px;
+    transition: background 0.15s, transform 0.15s;
+}
+.sy-hear-btn:hover  { background: rgba(255,255,255,0.18); transform: translateY(-2px); }
+.sy-hear-btn:active { transform: scale(0.96); }
+.sy-hear-btn.playing {
+    background: linear-gradient(135deg, #4ca494, #2e7d6e);
+    border-color: transparent;
+    color: white;
+}
+
+/* ── Labels ── */
 .sy-label {
-    font-family:'Patrick Hand',cursive;
-    color:rgba(255,255,255,0.45); text-align:center;
-    font-size:0.95rem; margin-bottom:10px;
+    font-family: 'Patrick Hand', cursive;
+    color: rgba(255,255,255,0.45);
+    text-align: center;
+    font-size: 0.95rem;
+    margin-bottom: 12px;
 }
 
-.sy-split-zone {
-    text-align:center; margin-bottom:4px;
-    display:flex; flex-direction:column; align-items:center; gap:8px;
-}
-.sy-source-tile {
-    display:inline-block;
-    font-family:'Fredoka',sans-serif; font-size:2rem; font-weight:700;
-    color:white; background:linear-gradient(135deg,#9b59b6,#7a3fa0);
-    padding:14px 28px; border-radius:14px; cursor:grab;
-    box-shadow:0 4px 0 #5a2a80;
-}
-.sy-divider-hint {
-    font-family:'Patrick Hand',cursive;
-    color:rgba(255,255,255,0.3); font-size:0.82rem;
-}
-
-/* Tap-to-split */
+/* ── Tap zone ── */
 .sy-tap-zone {
-    display:flex; justify-content:center; flex-wrap:wrap;
-    gap:0; margin-bottom:12px;
-}
-.sy-char {
-    font-family:'Fredoka',sans-serif;
-    font-size:2.8rem; font-weight:700;
-    color:rgba(240,234,214,0.92); cursor:pointer;
-    padding:8px 4px;
-    border-right:3px solid transparent;
-    transition:border-color 0.15s, color 0.15s;
-    user-select:none;
-}
-.sy-char:hover { color:#7fd6c4; }
-.sy-char.split-here {
-    border-right-color:#7fd6c4;
-    color:#7fd6c4;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0;
+    margin-bottom: 12px;
 }
 
+.sy-char {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: rgba(240,234,214,0.92);
+    cursor: pointer;
+    padding: 8px 6px;
+    border-right: 4px solid transparent;
+    transition: border-color 0.15s, color 0.15s, transform 0.1s;
+    user-select: none;
+}
+.sy-char:hover { color: #7fd6c4; transform: scale(1.1); }
+.sy-char.split-here {
+    border-right-color: #7fd6c4;
+    color: #7fd6c4;
+}
+
+/* ── Preview bubbles ── */
 .sy-user-result {
-    display:flex; justify-content:center; flex-wrap:wrap;
-    gap:10px; min-height:52px; margin-top:10px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    min-height: 52px;
+    margin-top: 10px;
 }
 .sy-syl-bubble {
-    font-family:'Fredoka',sans-serif; font-size:1.4rem; font-weight:700;
-    padding:8px 18px; border-radius:12px;
-    background:rgba(255,255,255,0.1);
-    border:2px solid rgba(255,255,255,0.2);
-    color:rgba(240,234,214,0.9);
-    animation:bounceIn 0.3s ease;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    padding: 8px 18px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.2);
+    color: rgba(240,234,214,0.9);
+    animation: bounceIn 0.3s ease;
 }
-.sy-syl-bubble.correct { background:rgba(76,164,148,0.5); border-color:#4ca494; }
-.sy-syl-bubble.wrong   { background:rgba(231,76,60,0.4);  border-color:#e74c3c; }
+.sy-syl-bubble.correct { background: rgba(76,164,148,0.5);  border-color: #4ca494; }
+.sy-syl-bubble.wrong   { background: rgba(231,76,60,0.4);   border-color: #e74c3c; }
 
 @keyframes bounceIn {
-    0%{transform:scale(0.5);opacity:0} 70%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1}
+    0%   { transform: scale(0.5); opacity: 0; }
+    70%  { transform: scale(1.1); }
+    100% { transform: scale(1);   opacity: 1; }
 }
 </style>
 
 <script>
-const WORD_ID      = {{ syllable_word.id }};
-const CORRECT_SYLS = {{ syllable_word.syllable_structure|safe }};
-const CSRF_TOKEN   = "{{ csrf_token }}";
-const SUBMIT_URL   = "{% url 'syllable_submit' %}";
-const FULL_WORD    = "{{ syllable_word.word }}";
-const startTime    = Date.now();
+document.addEventListener('DOMContentLoaded', function () {
 
-function toggleSplit(charEl) {
-    charEl.classList.toggle('split-here');
-    updatePreview();
-}
+    const pd          = JSON.parse(document.getElementById('pageData').textContent);
+    const WORD_ID     = pd.word_id;
+    const WORD_TEXT   = pd.word_text;
+    const HAS_AUDIO   = pd.has_audio;
+    const CORRECT_SYLS = pd.correct_syls;
+    const CSRF_TOKEN  = pd.csrf_token;
+    const SUBMIT_URL  = pd.submit_url;
+    const startTime   = Date.now();
 
-function updatePreview() {
-    const chars   = Array.from(document.querySelectorAll('.sy-char'));
-    const result  = document.getElementById('userResult');
-    result.innerHTML = '';
-    let current = '';
-    chars.forEach((c, i) => {
-        current += c.dataset.index !== undefined ? c.textContent : '';
-        if (c.classList.contains('split-here') || i === chars.length - 1) {
-            if (current) {
-                const bubble = document.createElement('span');
-                bubble.className = 'sy-syl-bubble';
-                bubble.textContent = current;
-                result.appendChild(bubble);
-                current = '';
+    // Progress bar
+    const fill = document.querySelector('.ps-fill[data-width]');
+    if (fill) fill.style.width = fill.dataset.width + '%';
+
+    // ── Hear It — FIX: TTS fallback when no audio file uploaded ──
+    window.playWord = function () {
+        const btn     = document.getElementById('hearBtn');
+        const audioEl = document.getElementById('wordAudio');
+
+        btn.classList.add('playing');
+        btn.querySelector('span').textContent = 'Playing…';
+
+        const done = () => {
+            btn.classList.remove('playing');
+            btn.querySelector('span').textContent = 'Hear It';
+        };
+
+        if (HAS_AUDIO && audioEl) {
+            audioEl.currentTime = 0;
+            audioEl.play();
+            audioEl.onended = done;
+        } else {
+            // Browser TTS — works with zero uploads
+            speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(WORD_TEXT);
+            u.rate  = 0.82;
+            u.lang  = 'en-US';
+            u.onend = done;
+            speechSynthesis.speak(u);
+        }
+    };
+
+    // Clap animation on big word tap
+    window.clapWord = function () {
+        const el = document.getElementById('displayWord');
+        el.classList.add('clap');
+        setTimeout(() => el.classList.remove('clap'), 150);
+        playWord();
+    };
+
+    // ── Tap-to-split ──────────────────────────────────────────
+    window.toggleSplit = function (charEl) {
+        // Don't allow split after the last character
+        const chars = Array.from(document.querySelectorAll('.sy-char'));
+        if (parseInt(charEl.dataset.index) === chars.length - 1) return;
+        charEl.classList.toggle('split-here');
+        updatePreview();
+    };
+
+    function updatePreview() {
+        const chars  = Array.from(document.querySelectorAll('.sy-char'));
+        const result = document.getElementById('userResult');
+        result.innerHTML = '';
+        let cur = '';
+        chars.forEach((c, i) => {
+            cur += c.textContent;
+            if (c.classList.contains('split-here') || i === chars.length - 1) {
+                if (cur) {
+                    const bubble = document.createElement('span');
+                    bubble.className  = 'sy-syl-bubble';
+                    bubble.textContent = cur;
+                    result.appendChild(bubble);
+                    cur = '';
+                }
             }
+        });
+    }
+
+    function getSyllables() {
+        const chars = Array.from(document.querySelectorAll('.sy-char'));
+        const syls  = [];
+        let   cur   = '';
+        chars.forEach((c, i) => {
+            cur += c.textContent;
+            if (c.classList.contains('split-here') || i === chars.length - 1) {
+                syls.push(cur);
+                cur = '';
+            }
+        });
+        return syls;
+    }
+
+    // ── Check ─────────────────────────────────────────────────
+    window.checkSyllables = async function () {
+        const submitted = getSyllables();
+        if (submitted.length < 2) {
+            alert('Tap between letters to make at least 2 syllables! 😊');
+            return;
         }
-    });
-}
 
-function getSyllables() {
-    const chars = Array.from(document.querySelectorAll('.sy-char'));
-    const syls  = [];
-    let   cur   = '';
-    chars.forEach((c, i) => {
-        cur += c.textContent;
-        if (c.classList.contains('split-here') || i === chars.length - 1) {
-            syls.push(cur); cur = '';
-        }
-    });
-    return syls;
-}
+        const rt  = (Date.now() - startTime) / 1000;
+        const res = await fetch(SUBMIT_URL, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+            body:    JSON.stringify({ word_id: WORD_ID, submitted_splits: submitted, response_time: rt })
+        });
+        const data = await res.json();
 
-async function checkSyllables() {
-    const submitted = getSyllables();
-    if (submitted.length < 2) { alert('Try splitting into at least 2 parts! 😊'); return; }
+        // Colour the preview bubbles
+        const bubbles = document.querySelectorAll('.sy-syl-bubble');
+        submitted.forEach((syl, i) => {
+            if (bubbles[i]) {
+                const match = data.correct_answer &&
+                              syl.toLowerCase() === data.correct_answer[i]?.toLowerCase();
+                bubbles[i].classList.add(match ? 'correct' : 'wrong');
+            }
+        });
 
-    const rt  = (Date.now() - startTime) / 1000;
-    const res = await fetch(SUBMIT_URL, {
-        method:'POST',
-        headers:{'Content-Type':'application/json','X-CSRFToken':CSRF_TOKEN},
-        body: JSON.stringify({ word_id: WORD_ID, submitted_splits: submitted, response_time: rt })
-    });
-    const data = await res.json();
+        setTimeout(() => {
+            document.getElementById('rEmoji').textContent = data.correct ? '✂️🌟' : '🤔';
+            document.getElementById('rTitle').textContent = data.correct ? 'Perfect Split!' : 'Not quite!';
+            document.getElementById('rSub').textContent   = data.correct
+                ? `${CORRECT_SYLS.join(' · ')} — brilliant!`
+                : `Correct: ${(data.correct_answer || CORRECT_SYLS).join(' · ')}`;
+            document.getElementById('resultOverlay').classList.remove('hidden');
+        }, 800);
+    };
 
-    // Colour bubbles
-    const bubbles = document.querySelectorAll('.sy-syl-bubble');
-    submitted.forEach((syl, i) => {
-        if (bubbles[i])
-            bubbles[i].classList.add(data.correct_answer && syl === data.correct_answer[i] ? 'correct' : 'wrong');
-    });
+    window.resetSplit = function () {
+        document.querySelectorAll('.sy-char').forEach(c => c.classList.remove('split-here'));
+        document.getElementById('userResult').innerHTML = '';
+    };
 
-    setTimeout(() => {
-        document.getElementById('rEmoji').textContent = data.correct ? '✂️🌟' : '🤔';
-        document.getElementById('rTitle').textContent = data.correct ? 'Perfect Split!' : 'Not quite!';
-        document.getElementById('rSub').textContent   = data.correct
-            ? `${CORRECT_SYLS.join(' · ')} — brilliant!`
-            : `Correct: ${data.correct_answer ? data.correct_answer.join(' · ') : CORRECT_SYLS.join(' · ')}`;
-        document.getElementById('resultOverlay').classList.remove('hidden');
-    }, 800);
-}
+    window.closeResult = function () {
+        document.getElementById('resultOverlay').classList.add('hidden');
+        resetSplit();
+    };
 
-function resetSplit() {
-    document.querySelectorAll('.sy-char').forEach(c => c.classList.remove('split-here'));
-    document.getElementById('userResult').innerHTML = '';
-}
-
-function closeResult() {
-    document.getElementById('resultOverlay').classList.add('hidden');
-    resetSplit();
-}
-
-function playWord() {
-    const a = document.getElementById('wordAudio');
-    if (a) { a.currentTime = 0; a.play(); }
-}
-
-// Clap on big word click
-document.getElementById('displayWord').addEventListener('click', () => {
-    const el = document.getElementById('displayWord');
-    el.style.transform = 'scale(0.92)';
-    setTimeout(() => el.style.transform = '', 150);
-    playWord();
 });
 </script>
 {% endblock %}
