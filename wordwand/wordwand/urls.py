@@ -16,6 +16,7 @@ urlpatterns = [
     path("", include("tts_engine.urls")),
     path("", include("dashboard.urls")),
     path("", include("games.urls")),
+    path('', include('chatbot.urls'))
 ]
 
 if settings.DEBUG:

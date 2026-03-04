@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="main-board chatbot-board">
+
+    <!-- Header -->
+    <div class="cb-header">
+        <div class="cb-avatar">🪄</div>
+        <div class="cb-header-text">
+            <h2 class="cb-name">Wanda</h2>
+            <p class="cb-tagline">Your reading helper — ask me anything!</p>
+        </div>
+        <a href="{% url 'home' %}" class="gtb-back">
+            <span>←</span>Home
+        </a>
+    </div>
+
+    <!-- Message window -->
+    <div class="cb-window" id="cbWindow">
+
+        <!-- Welcome bubble -->
+        <div class="cb-msg cb-msg-bot">
+            <div class="cb-bubble">
+                Hi! I'm Wanda 🪄 I'm here to help you with reading and spelling!
+                Ask me anything — like <em>"how do I split syllables?"</em>
+                or <em>"what is a sight word?"</em> 😊
+            </div>
+            <div class="cb-ts">Wanda</div>
+        </div>
+
+    </div>
+
+    <!-- Suggestion chips -->
+    <div class="cb-chips" id="cbChips">
+        <button class="cb-chip" onclick="sendChip(this)">What is a sight word?</button>
+        <button class="cb-chip" onclick="sendChip(this)">How do I split syllables?</button>
+        <button class="cb-chip" onclick="sendChip(this)">Help me with b and d</button>
+        <button class="cb-chip" onclick="sendChip(this)">What games should I play?</button>
+    </div>
+
+    <!-- Input row -->
+    <div class="cb-input-row">
+        <input
+            type="text"
+            id="cbInput"
+            class="cb-input"
+            placeholder="Type your question…"
+            autocomplete="off"
+            onkeydown="if(event.key==='Enter') sendMessage()"
+            maxlength="300"
+        >
+        <button class="cb-send-btn" id="cbSendBtn" onclick="sendMessage()">
+            <span id="cbSendIcon">➤</span>
+        </button>
+    </div>
+
+</div>
+
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Patrick+Hand&display=swap");
+@import url("{% static 'css/_shared.css' %}");
+
+/* ── Board ── */
+.chatbot-board {
+    width: 96%;
+    max-width: 1100px;
+    background: #2c3e50;
+    border: 22px solid #b5651d;
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 8px #8b4513, 0 30px 60px rgba(0,0,0,0.4);
+    padding: 32px 44px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    height: 62vh;
+    max-height: 520px;
+    position: relative;
+    z-index: 5;
+}
+
+/* ── Header ── */
+.cb-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+}
+.cb-avatar {
+    font-size: 2.4rem;
+    width: 56px;
+    height: 56px;
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.cb-header-text { flex: 1; }
+.cb-name {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: rgba(240,234,214,0.95);
+    margin: 0;
+}
+.cb-tagline {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.4);
+    margin: 2px 0 0;
+}
+.gtb-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.15);
+    color: rgba(240,234,214,0.72);
+    padding: 7px 14px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+}
+.gtb-back:hover { background: rgba(255,255,255,0.15); color: white; }
+
+/* ── Message window ── */
+.cb-window {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 4px 2px 8px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+.cb-window::-webkit-scrollbar { width: 5px; }
+.cb-window::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 99px; }
+
+/* ── Message bubbles ── */
+.cb-msg {
+    display: flex;
+    flex-direction: column;
+    max-width: 78%;
+}
+.cb-msg-bot  { align-self: flex-start; align-items: flex-start; }
+.cb-msg-user { align-self: flex-end;   align-items: flex-end; }
+
+.cb-bubble {
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.05rem;
+    line-height: 1.55;
+    word-break: break-word;
+}
+.cb-msg-bot  .cb-bubble {
+    background: rgba(255,255,255,0.1);
+    border: 1.5px solid rgba(255,255,255,0.15);
+    color: rgba(240,234,214,0.92);
+    border-bottom-left-radius: 4px;
+}
+.cb-msg-user .cb-bubble {
+    background: linear-gradient(135deg, #4ca494, #3a8a7a);
+    border: none;
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+.cb-ts {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.3);
+    margin-top: 4px;
+    padding: 0 4px;
+}
+
+/* Typing indicator */
+.cb-typing .cb-bubble {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    padding: 14px 20px;
+}
+.cb-dot {
+    width: 8px; height: 8px;
+    background: rgba(240,234,214,0.5);
+    border-radius: 50%;
+    animation: dotBounce 1.2s infinite;
+}
+.cb-dot:nth-child(2) { animation-delay: 0.2s; }
+.cb-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotBounce {
+    0%,80%,100% { transform: translateY(0); opacity: 0.4; }
+    40%          { transform: translateY(-6px); opacity: 1; }
+}
+
+/* ── Suggestion chips ── */
+.cb-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 0 4px;
+    flex-shrink: 0;
+}
+.cb-chip {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 0.82rem;
+    color: rgba(240,234,214,0.7);
+    background: rgba(255,255,255,0.06);
+    border: 1.5px solid rgba(255,255,255,0.15);
+    border-radius: 99px;
+    padding: 5px 14px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+.cb-chip:hover { background: rgba(255,255,255,0.14); color: white; }
+
+/* ── Input row ── */
+.cb-input-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-shrink: 0;
+}
+.cb-input {
+    flex: 1;
+    background: rgba(255,255,255,0.07);
+    border: 2px solid rgba(255,255,255,0.18);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: rgba(240,234,214,0.94);
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.cb-input:focus { border-color: rgba(127,214,196,0.55); }
+.cb-input::placeholder { color: rgba(255,255,255,0.25); }
+
+.cb-send-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #4ca494, #2e7d6e);
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 0 #1a5a50;
+    transition: transform 0.15s, box-shadow 0.15s;
+    flex-shrink: 0;
+}
+.cb-send-btn:hover  { transform: translateY(-2px); box-shadow: 0 6px 0 #1a5a50; }
+.cb-send-btn:active { transform: translateY(1px);  box-shadow: 0 2px 0 #1a5a50; }
+.cb-send-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+@media (max-width: 768px) {
+    .chatbot-board { padding: 20px 18px 18px; height: 70vh; max-height: none; max-width: 98%; }
+    .cb-msg { max-width: 90%; }
+}
+</style>
+
+<script>
+const SUBMIT_URL = "{% url 'chatbot_message' %}";
+const CSRF_TOKEN = "{{ csrf_token }}";
+let   history    = [];   // [{role, content}, ...]
+let   busy       = false;
+
+function scrollBottom() {
+    const w = document.getElementById('cbWindow');
+    w.scrollTop = w.scrollHeight;
+}
+
+function appendMsg(role, text) {
+    const window_ = document.getElementById('cbWindow');
+    const wrap    = document.createElement('div');
+    wrap.className = `cb-msg cb-msg-${role}`;
+
+    const bubble = document.createElement('div');
+    bubble.className = 'cb-bubble';
+    bubble.textContent = text;
+
+    const ts = document.createElement('div');
+    ts.className  = 'cb-ts';
+    ts.textContent = role === 'bot' ? 'Wanda' : 'You';
+
+    wrap.appendChild(bubble);
+    wrap.appendChild(ts);
+    window_.appendChild(wrap);
+    scrollBottom();
+    return wrap;
+}
+
+function showTyping() {
+    const window_ = document.getElementById('cbWindow');
+    const wrap    = document.createElement('div');
+    wrap.className = 'cb-msg cb-msg-bot cb-typing';
+    wrap.id        = 'typingIndicator';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'cb-bubble';
+    bubble.innerHTML = '<div class="cb-dot"></div><div class="cb-dot"></div><div class="cb-dot"></div>';
+
+    wrap.appendChild(bubble);
+    window_.appendChild(wrap);
+    scrollBottom();
+}
+
+function hideTyping() {
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+}
+
+async function sendMessage() {
+    if (busy) return;
+
+    const input = document.getElementById('cbInput');
+    const text  = input.value.trim();
+    if (!text) return;
+
+    // Hide chips after first real message
+    document.getElementById('cbChips').style.display = 'none';
+
+    input.value = '';
+    appendMsg('user', text);
+    history.push({ role: 'user', content: text });
+
+    busy = true;
+    document.getElementById('cbSendBtn').disabled = true;
+    showTyping();
+
+    try {
+        const res  = await fetch(SUBMIT_URL, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+            body:    JSON.stringify({ message: text, history: history.slice(0, -1) })
+        });
+        const data = await res.json();
+        hideTyping();
+
+        const reply = data.reply || data.error || 'Oops, something went wrong! 😅 Try again?';
+        appendMsg('bot', reply);
+        history.push({ role: 'assistant', content: reply });
+
+        // Keep history from growing too large
+        if (history.length > 20) history = history.slice(-20);
+
+    } catch (err) {
+        hideTyping();
+        appendMsg('bot', 'Oops, I lost my connection! 🌐 Check your internet and try again.');
+    }
+
+    busy = false;
+    document.getElementById('cbSendBtn').disabled = false;
+    document.getElementById('cbInput').focus();
+}
+
+function sendChip(btn) {
+    document.getElementById('cbInput').value = btn.textContent;
+    sendMessage();
+}
+
+// Focus input on load
+window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('cbInput').focus();
+});
+</script>
+
+{% endblock %}

@@ -101,6 +101,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 # Tesseract OCR — set via .env so it works cross-platform
 TESSERACT_CMD = os.getenv('TESSERACT_CMD', r"C:\Program Files\Tesseract-OCR\tesseract.exe")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 # Password Reset Token Expiration — 24 hours
 PASSWORD_RESET_TIMEOUT = 86400

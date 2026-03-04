@@ -1,19 +1,38 @@
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
 
 # Django
 db.sqlite3
+*.log
+media/
 
-# Virtual environment
+# Virtual environments
+.venv/
 venv/
+env/
 
 # Environment variables
 .env
+.env.*
 
-# OS junk
+# Static files (if using collectstatic)
+staticfiles/
+
+# OS files
 .DS_Store
 Thumbs.db
-**/__pycache__/
-*.pyc
 
+# IDE files
+.vscode/
+.idea/
+
+# Python build files
+build/
+dist/
+*.egg-info/
+
+# Cache
+.pytest_cache/
+.cache/

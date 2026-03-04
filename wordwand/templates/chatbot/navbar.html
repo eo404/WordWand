@@ -1,0 +1,38 @@
+{% load static %}
+<nav class="pill-navbar">
+
+    <!-- Left: Logo -->
+    <div class="nav-left">
+        <div class="logo-circle">
+            <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+    </div>
+
+    <!-- Center: Brand -->
+    <div class="nav-center">
+        WordWand
+    </div>
+
+    <!-- Right: Nav actions -->
+    <div class="nav-right">
+        {% if user.is_authenticated %}
+            <a href="{% url 'chatbot' %}" class="pill nav-purple">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Wanda
+            </a>
+            <a href="{% url 'dashboard' %}" class="pill nav-green">
+                <i class="fa-solid fa-gauge"></i> Dashboard
+            </a>
+            <a href="{% url 'profile' %}?next={{ request.path }}" class="pill blue">
+                <i class="fa-solid fa-user"></i> {{ user.username }}
+            </a>
+        {% else %}
+            <a href="{% url 'login' %}" class="pill blue">
+                <i class="fa-solid fa-right-to-bracket"></i> Login
+            </a>
+            <a href="{% url 'register' %}" class="pill nav-green">
+                <i class="fa-solid fa-user-plus"></i> Sign Up
+            </a>
+        {% endif %}
+    </div>
+
+</nav>
