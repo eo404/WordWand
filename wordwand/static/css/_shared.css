@@ -1,0 +1,159 @@
+/* ═══════════════════════════════════════
+   WORDWAND GAME SHARED STYLES
+   Included inline in every game template
+═══════════════════════════════════════ */
+
+/* Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Patrick+Hand&display=swap');
+
+/* ── Board wrapper (all games use .game-board) ── */
+.game-board {
+    width: 95%;
+    max-width: 1100px;
+    min-height: 560px;
+    background: #2c3e50;
+    border: 22px solid #b5651d;
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 8px #8b4513, 0 30px 60px rgba(0,0,0,0.4);
+    position: relative;
+    z-index: 5;
+    padding: 48px 56px 44px;
+}
+
+/* ── Chalk typography ── */
+.chalk-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 2rem; font-weight: 700;
+    color: rgba(240,234,214,0.92);
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+}
+.chalk-sub {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1rem;
+    color: rgba(255,255,255,0.5);
+    margin-top: 4px;
+}
+
+/* ── Progress strip ── */
+.progress-strip {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 28px;
+}
+.ps-label {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 0.88rem; color: rgba(255,255,255,0.5);
+    white-space: nowrap;
+}
+.ps-track {
+    flex: 1; height: 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 99px; overflow: hidden;
+}
+.ps-fill {
+    height: 100%;
+    background: linear-gradient(to right, #4ca494, #7fd6c4);
+    border-radius: 99px;
+    transition: width 0.6s ease;
+}
+.ps-badge {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 0.82rem; font-weight: 700;
+    color: #7fd6c4; white-space: nowrap;
+    background: rgba(127,214,196,0.15);
+    border: 1px solid rgba(127,214,196,0.3);
+    padding: 3px 10px; border-radius: 99px;
+}
+
+/* ── Instruction banner ── */
+.instruct {
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(255,255,255,0.06);
+    border-left: 3px solid rgba(127,214,196,0.5);
+    border-radius: 10px;
+    padding: 12px 18px;
+    margin-bottom: 28px;
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.05rem; color: rgba(240,234,214,0.82);
+}
+.instruct-icon { font-size: 1.5rem; flex-shrink: 0; }
+
+/* ── Generic chalk button ── */
+.g-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1rem; font-weight: 600;
+    padding: 10px 24px; border-radius: 999px;
+    border: none; cursor: pointer; letter-spacing: 0.3px;
+    transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.15s;
+}
+.g-btn:hover  { transform: translateY(-2px); }
+.g-btn:active { transform: translateY(1px) scale(0.97); }
+
+.g-btn-teal   { background: linear-gradient(135deg,#4ca494,#3a8a7a); color:white; box-shadow:0 4px 0 #2a6b5e, 0 6px 16px rgba(76,164,148,0.3); }
+.g-btn-amber  { background: linear-gradient(135deg,#f5ac3e,#d4841a); color:white; box-shadow:0 4px 0 #a05a0a, 0 6px 16px rgba(245,172,62,0.3); }
+.g-btn-ghost  { background: transparent; color: rgba(255,255,255,0.8); border: 2px solid rgba(255,255,255,0.3); }
+.g-btn-ghost:hover { background: rgba(255,255,255,0.08); }
+.g-btn-red    { background: linear-gradient(135deg,#e74c3c,#c0392b); color:white; box-shadow:0 4px 0 #922b21; }
+
+/* ── Result overlay ── */
+.result-overlay {
+    position: fixed; inset: 0;
+    background: rgba(10,18,26,0.78);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(7px);
+}
+.result-overlay.hidden { display: none !important; }
+
+.result-card {
+    background: #f8efd9;
+    border: 5px solid #b5651d;
+    border-radius: 24px;
+    padding: 40px 44px;
+    text-align: center;
+    max-width: 400px; width: 90%;
+    animation: rPop 0.42s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+.r-emoji { font-size: 3.8rem; margin-bottom: 8px; }
+.r-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.9rem; font-weight: 700;
+    color: #2c3e50; margin-bottom: 6px;
+}
+.r-sub {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1rem; color: #7a6a50;
+    margin-bottom: 24px;
+}
+.r-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+
+/* ── Animations ── */
+@keyframes rPop {
+    from { opacity:0; transform: scale(0.4) rotate(-4deg); }
+    to   { opacity:1; transform: scale(1) rotate(0deg); }
+}
+@keyframes bounceIn {
+    0%   { transform: scale(0.3); opacity:0; }
+    60%  { transform: scale(1.08); opacity:1; }
+    100% { transform: scale(1); }
+}
+@keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%     { transform: translateX(-10px); }
+    40%     { transform: translateX(10px); }
+    60%     { transform: translateX(-6px); }
+    80%     { transform: translateX(6px); }
+}
+@keyframes glow {
+    0%,100% { box-shadow: 0 0 0 rgba(127,214,196,0); }
+    50%     { box-shadow: 0 0 24px rgba(127,214,196,0.7); }
+}
+@keyframes starPop {
+    0%   { transform: scale(0) rotate(-20deg); opacity:0; }
+    60%  { transform: scale(1.2) rotate(5deg); opacity:1; }
+    100% { transform: scale(1) rotate(0); opacity:1; }
+}
+
+.anim-correct { animation: glow 0.6s ease, bounceIn 0.4s ease; }
+.anim-wrong   { animation: shake 0.4s ease; }

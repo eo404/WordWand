@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="main-board game-board">
+    {% include "games/game_topbar.html" with game_title="Sight Word Tap" game_emoji="👁️" %}
+
+
+    <div class="progress-strip">
+        <span class="ps-label">👁️ Sight Word Tap</span>
+        <div class="ps-track"><div class="ps-fill" style="width:{{ progress.accuracy|default:0 }}%"></div></div>
+        <span class="ps-badge">Level {{ progress.level|default:1 }} · {{ progress.accuracy|default:0|floatformat:0 }}%</span>
+    </div>
+
+    <div class="instruct">
+        <span class="instruct-icon">👀</span>
+        <span>Study the word carefully — then pick it from the options!</span>
+    </div>
+
+    <!-- Flash card -->
+    <div class="sw-card-wrap">
+        <div class="sw-flash-card" id="flashCard">
+            <div class="sw-word" id="flashWord">{{ target.word }}</div>
+            <div class="sw-word hidden" id="hiddenMsg">❓</div>
+        </div>
+        <div class="sw-timer-bar">
+            <div class="sw-timer-fill" id="timerFill"></div>
+        </div>
+        <p class="sw-timer-label" id="timerLabel">Memorise!</p>
+    </div>
+
+    <!-- Options grid (shown after timeout) -->
+    <div class="sw-options hidden" id="optionsPanel">
+        <p class="sw-pick-label">Which word did you see?</p>
+        <div class="sw-grid">
+            {% for opt in options %}
+            <button class="sw-opt" onclick="submitAnswer({{ opt.id }}, this)"
+                    data-correct="{{ opt.id }}">
+                {{ opt.word }}
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+<!-- Result -->
+<div class="result-overlay hidden" id="resultOverlay">
+    <div class="result-card">
+        <div class="r-emoji" id="rEmoji"></div>
+        <div class="r-title" id="rTitle"></div>
+        <div class="r-sub"   id="rSub"></div>
+        <div class="r-actions">
+            <button class="g-btn g-btn-teal"  onclick="location.reload()">Next Word ▶</button>
+            <button class="g-btn g-btn-ghost" onclick="window.location='{% url "menu" %}'">Menu</button>
+        </div>
+    </div>
+</div>
+
+<style>
+@import url("{% static 'css/_shared.css' %}");
+
+.sw-card-wrap { text-align:center; margin-bottom:32px; }
+
+.sw-flash-card {
+    display:inline-block;
+    background:rgba(255,255,255,0.1);
+    border:3px solid rgba(255,255,255,0.2);
+    border-radius:20px; padding:40px 60px;
+    min-width:240px; margin-bottom:14px;
+    transition: opacity 0.4s, transform 0.4s;
+}
+.sw-word {
+    font-family:'Fredoka',sans-serif;
+    font-size:3.5rem; font-weight:700;
+    color:rgba(240,234,214,0.94);
+    letter-spacing:4px;
+}
+.hidden { display:none !important; }
+
+.sw-timer-bar {
+    height:8px; background:rgba(255,255,255,0.1);
+    border-radius:99px; overflow:hidden;
+    max-width:300px; margin:0 auto 8px;
+}
+.sw-timer-fill {
+    height:100%; width:100%;
+    background:linear-gradient(to right,#4ca494,#7fd6c4);
+    border-radius:99px;
+    transition: width linear;
+}
+.sw-timer-label {
+    font-family:'Patrick Hand',cursive;
+    color:rgba(255,255,255,0.5); font-size:0.9rem;
+}
+
+.sw-options { text-align:center; }
+.sw-pick-label {
+    font-family:'Patrick Hand',cursive;
+    color:rgba(240,234,214,0.7); font-size:1rem; margin-bottom:18px;
+}
+.sw-grid {
+    display:grid; grid-template-columns:repeat(2,1fr);
+    gap:14px; max-width:500px; margin:0 auto;
+}
+.sw-opt {
+    padding:22px 16px; border-radius:16px;
+    font-family:'Fredoka',sans-serif; font-size:1.6rem; font-weight:700;
+    color:rgba(240,234,214,0.92); cursor:pointer;
+    background:rgba(255,255,255,0.08);
+    border:2.5px solid rgba(255,255,255,0.2);
+    box-shadow:0 4px 0 rgba(0,0,0,0.2);
+    transition:transform 0.15s cubic-bezier(0.34,1.56,0.64,1), background 0.15s;
+}
+.sw-opt:hover   { transform:translateY(-4px) scale(1.04); background:rgba(255,255,255,0.15); }
+.sw-opt.correct { background:rgba(76,164,148,0.6)!important; border-color:#4ca494!important; color:white!important; }
+.sw-opt.wrong   { background:rgba(231,76,60,0.5)!important;  border-color:#e74c3c!important; }
+</style>
+
+<script>
+const TARGET_ID  = {{ target.id }};
+const CSRF_TOKEN = "{{ csrf_token }}";
+const SUBMIT_URL = "{% url 'sight_word_submit' %}";
+const SHOW_MS    = 3000;
+let startTime;
+
+function runFlash() {
+    const fill  = document.getElementById('timerFill');
+    const label = document.getElementById('timerLabel');
+    fill.style.transition = `width ${SHOW_MS}ms linear`;
+    requestAnimationFrame(() => fill.style.width = '0%');
+
+    let remaining = SHOW_MS / 1000;
+    const tick = setInterval(() => {
+        remaining -= 0.1;
+        label.textContent = remaining > 0 ? `${remaining.toFixed(1)}s` : '';
+        if (remaining <= 0) clearInterval(tick);
+    }, 100);
+
+    setTimeout(() => {
+        document.getElementById('flashWord').classList.add('hidden');
+        document.getElementById('hiddenMsg').classList.remove('hidden');
+        document.getElementById('flashCard').style.opacity = '0.5';
+        document.getElementById('optionsPanel').classList.remove('hidden');
+        label.textContent = 'Which one?';
+        startTime = Date.now();
+    }, SHOW_MS);
+}
+
+async function submitAnswer(selectedId, btn) {
+    document.querySelectorAll('.sw-opt').forEach(b => b.disabled = true);
+    const rt  = (Date.now() - startTime) / 1000;
+    const res = await fetch(SUBMIT_URL, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-CSRFToken':CSRF_TOKEN},
+        body: JSON.stringify({ word_id: TARGET_ID, selected_id: selectedId, response_time: rt })
+    });
+    const data = await res.json();
+
+    btn.classList.add(data.correct ? 'correct' : 'wrong');
+    // Also reveal correct
+    if (!data.correct) {
+        document.querySelectorAll('.sw-opt').forEach(b => {
+            if (parseInt(b.dataset.correct) === TARGET_ID) b.classList.add('correct');
+        });
+    }
+
+    setTimeout(() => {
+        document.getElementById('rEmoji').textContent = data.correct ? '⚡' : '😊';
+        document.getElementById('rTitle').textContent = data.correct ? 'Got it!' : 'Keep practising!';
+        document.getElementById('rSub').textContent   = data.correct ? 'Fast and accurate!' : `The word was: {{ target.word }}`;
+        document.getElementById('resultOverlay').classList.remove('hidden');
+    }, 700);
+}
+
+window.addEventListener('DOMContentLoaded', () => setTimeout(runFlash, 500));
+</script>
+{% endblock %}

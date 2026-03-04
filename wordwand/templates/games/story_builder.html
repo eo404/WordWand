@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="main-board game-board">
+    {% include "games/game_topbar.html" with game_title="Story Builder" game_emoji="📖" %}
+
+    <div class="progress-strip">
+        <span class="ps-label">📖 Story Builder</span>
+        <div class="ps-track">
+            <div class="ps-fill" data-width="{{ progress.accuracy|default:0 }}"></div>
+        </div>
+        <span class="ps-badge">
+            Level {{ progress.level|default:1 }} ·
+            {{ progress.accuracy|default:0|floatformat:0 }}%
+        </span>
+    </div>
+
+    <div class="instruct">
+        <span class="instruct-icon">📖</span>
+        <span>
+            Read the story — tap <span class="hl-badge">yellow words</span> to hear them!
+            Fill in the blanks.
+        </span>
+    </div>
+
+    <!-- Story card -->
+    <div class="sb-story-card">
+        <div class="sb-title">{{ story.title }}</div>
+
+        <div class="sb-controls">
+            <button class="sb-ctrl-btn" onclick="readAll()">▶ Read All</button>
+            <button class="sb-ctrl-btn" onclick="stopAll()">⏹ Stop</button>
+            <button class="sb-ctrl-btn" id="slowBtn" onclick="toggleSlow()">🐢 Normal</button>
+        </div>
+
+        <div class="sb-text" id="storyText"></div>
+    </div>
+
+    {% if story.fill_blanks %}
+    <div class="sb-blanks-section">
+        <p class="sb-blank-title">📝 Fill in the missing words:</p>
+        <div class="sb-blanks-grid">
+            {% for blank in story.fill_blanks %}
+            <div class="sb-blank-item">
+                <span class="sb-blank-label">Blank {{ forloop.counter }}:</span>
+                <input type="text"
+                       class="sb-blank-input"
+                       data-pos="{{ blank.0 }}"
+                       placeholder="type here…"
+                       autocomplete="off"
+                       spellcheck="false">
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- FIX: removed stray "Menu" text outside button tags -->
+    <div style="display:flex;justify-content:center;gap:12px;margin-top:24px;flex-wrap:wrap;">
+        <button class="g-btn g-btn-teal" onclick="submitStory()">✅ Done Reading</button>
+        <button class="g-btn g-btn-ghost" data-href="{% url 'menu' %}">Menu</button>
+    </div>
+</div>
+
+<!-- Result -->
+<div class="result-overlay hidden" id="resultOverlay">
+    <div class="result-card">
+        <div class="r-emoji">🌟</div>
+        <div class="r-title">Story Complete!</div>
+        <div class="r-sub">Amazing reading — keep it up!</div>
+        <div class="r-actions">
+            <button class="g-btn g-btn-teal" onclick="location.reload()">Next Story ▶</button>
+            <!-- FIX: removed stray "Menu" text outside button tags -->
+            <button class="g-btn g-btn-ghost" data-href="{% url 'menu' %}">Menu</button>
+        </div>
+    </div>
+</div>
+
+<!-- JSON DATA -->
+<script id="pageData" type="application/json">
+{
+    "story_id": {{ story.id }},
+    "csrf_token": "{{ csrf_token }}",
+    "submit_url": "{% url 'story_submit' %}",
+    "hard_words": {{ hard_words_json|default:"[]" }}
+}
+</script>
+
+{{ story.content|json_script:"storyContentData" }}
+
+<style>
+@import url("{% static 'css/_shared.css' %}");
+
+.sb-story-card {
+    background:rgba(255,255,255,0.06);
+    border:2px solid rgba(255,255,255,0.14);
+    border-radius:16px;
+    padding:24px 28px;
+    margin-bottom:20px;
+}
+.sb-title {
+    font-family:'Fredoka',sans-serif;
+    font-size:1.5rem;
+    font-weight:700;
+    color:rgba(240,234,214,0.94);
+    margin-bottom:14px;
+}
+.sb-controls { display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; }
+.sb-ctrl-btn {
+    background:rgba(255,255,255,0.1);
+    border:1.5px solid rgba(255,255,255,0.22);
+    border-radius:10px;
+    padding:7px 16px;
+    cursor:pointer;
+    color:rgba(240,234,214,0.85);
+    font-family:'Fredoka',sans-serif;
+    font-size:0.95rem;
+    transition:background 0.15s;
+}
+.sb-ctrl-btn:hover { background:rgba(255,255,255,0.18); }
+
+.sb-text {
+    font-family:'Patrick Hand',cursive;
+    font-size:1.22rem;
+    line-height:2.2;
+    color:rgba(240,234,214,0.9);
+}
+.sb-word {
+    display:inline-block;
+    cursor:pointer;
+    padding:2px 5px;
+    border-radius:6px;
+    transition:background 0.15s;
+}
+.sb-word:hover { background:rgba(255,255,255,0.12); }
+.sb-word.hard-word {
+    background:#f3ce57;
+    color:#2c3e50;
+    font-weight:700;
+}
+.hl-badge {
+    background:#f3ce57;
+    color:#2c3e50;
+    padding:1px 8px;
+    border-radius:6px;
+    font-weight:700;
+}
+.sb-blanks-section { margin-bottom:20px; }
+.sb-blank-title {
+    font-family:'Fredoka',sans-serif;
+    font-size:1rem;
+    color:rgba(240,234,214,0.7);
+    margin-bottom:12px;
+}
+.sb-blanks-grid { display:flex; flex-wrap:wrap; gap:14px; }
+.sb-blank-item { display:flex; align-items:center; gap:8px; }
+.sb-blank-label {
+    font-family:'Patrick Hand',cursive;
+    font-size:0.9rem;
+    color:rgba(255,255,255,0.55);
+}
+.sb-blank-input {
+    background:rgba(255,255,255,0.08);
+    border:2px solid rgba(255,255,255,0.2);
+    border-radius:10px;
+    padding:8px 14px;
+    color:rgba(240,234,214,0.94);
+    font-family:'Fredoka',sans-serif;
+    font-size:1rem;
+    outline:none;
+    width:140px;
+    transition:border-color 0.2s;
+}
+.sb-blank-input:focus { border-color:rgba(127,214,196,0.6); }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    const pageData = JSON.parse(
+        document.getElementById('pageData').textContent
+    );
+
+    // FIX: storyContentData is set by Django's json_script tag — always a valid JSON string
+    const STORY_TEXT = JSON.parse(
+        document.getElementById('storyContentData').textContent
+    );
+
+    const STORY_ID   = pageData.story_id;
+    const CSRF_TOKEN = pageData.csrf_token;
+    const SUBMIT_URL = pageData.submit_url;
+    // FIX: hard_words_json is already a proper JSON array from views.py
+    const HARD_WORDS = pageData.hard_words;
+
+    const startTime  = Date.now();
+    let readSlow = false;
+
+    // Progress bar
+    const fill = document.querySelector('.ps-fill[data-width]');
+    if (fill) fill.style.width = fill.dataset.width + '%';
+
+    function renderStory() {
+        const container = document.getElementById('storyText');
+        if (!STORY_TEXT) return;
+
+        const tokens = STORY_TEXT.split(/(\s+)/);
+        container.innerHTML = '';
+
+        tokens.forEach(token => {
+            if (/^\s+$/.test(token)) {
+                container.appendChild(document.createTextNode(token));
+            } else {
+                const clean = token.replace(/[^a-zA-Z]/g, '').toLowerCase();
+                const span  = document.createElement('span');
+                span.className = 'sb-word';
+                span.textContent = token;
+
+                if (HARD_WORDS.includes(clean)) {
+                    span.classList.add('hard-word');
+                }
+
+                span.addEventListener('click', function() {
+                    speechSynthesis.cancel();
+                    const u = new SpeechSynthesisUtterance(token);
+                    u.rate = readSlow ? 0.55 : 0.85;
+                    speechSynthesis.speak(u);
+                });
+
+                container.appendChild(span);
+            }
+        });
+    }
+
+    window.readAll = function() {
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(STORY_TEXT);
+        u.rate = readSlow ? 0.55 : 0.85;
+        speechSynthesis.speak(u);
+    };
+
+    window.stopAll = function() {
+        speechSynthesis.cancel();
+    };
+
+    window.toggleSlow = function() {
+        readSlow = !readSlow;
+        document.getElementById('slowBtn').textContent =
+            readSlow ? '🐢 Slow' : '🐢 Normal';
+    };
+
+    window.submitStory = async function() {
+        const blanks  = document.querySelectorAll('.sb-blank-input');
+        const answers = {};
+        blanks.forEach(b => answers[b.dataset.pos] = b.value.trim());
+
+        const ts = (Date.now() - startTime) / 1000;
+
+        const res = await fetch(SUBMIT_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': CSRF_TOKEN
+            },
+            body: JSON.stringify({
+                story_id:     STORY_ID,
+                fill_answers: answers,
+                time_spent:   ts
+            })
+        });
+
+        if (res.ok) {
+            document.getElementById('resultOverlay').classList.remove('hidden');
+        }
+    };
+
+    renderStory();
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="main-board game-board"
+     data-confusion-id="{{ confusion.id|default:'' }}"
+     data-shown="{{ shown|escapejs }}"
+     data-submit-url="{% url 'confusion_submit' %}"
+     data-csrf="{{ csrf_token }}">
+
+    {% include "games/game_topbar.html" with game_title="Letter Fix" game_emoji="🔤" %}
+
+    <!-- PROGRESS (Fixed CSS issue) -->
+    <div class="progress-strip">
+        <span class="ps-label">🔤 Letter Fix</span>
+        <div class="ps-track">
+            <div class="ps-fill"
+                 id="progressFill"
+                 data-width="{{ progress.accuracy|default:0 }}">
+            </div>
+        </div>
+        <span class="ps-badge">
+            Level {{ progress.level|default:1 }} ·
+            {{ progress.accuracy|default:0|floatformat:0 }}%
+        </span>
+    </div>
+
+    {% if no_data %}
+        <div style="text-align:center;padding:60px 0;">
+            <div style="font-size:3rem;margin-bottom:16px;">🛠️</div>
+            <div class="chalk-title">No confusion sets yet!</div>
+        </div>
+    {% else %}
+
+    <div class="cf-stage">
+        <div class="cf-letter-frame">
+            <div class="cf-big-letter">{{ shown }}</div>
+        </div>
+
+        <div class="cf-options">
+            {% for opt in options %}
+            <button class="cf-opt-btn"
+                    data-value="{{ opt|escapejs }}">
+                {{ opt }}
+            </button>
+            {% endfor %}
+        </div>
+
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- RESULT -->
+<div class="result-overlay hidden" id="resultOverlay">
+    <div class="result-card">
+        <div id="rEmoji"></div>
+        <div id="rTitle"></div>
+        <div id="rSub"></div>
+    </div>
+</div>
+
+<style>
+@import url("{% static 'css/_shared.css' %}");
+
+.cf-opt-btn {
+    width:110px;
+    height:110px;
+    font-size:4rem;
+    cursor:pointer;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const board = document.querySelector(".main-board");
+
+    const CONFUSION_ID = board.dataset.confusionId || null;
+    const SHOWN_LETTER = board.dataset.shown;
+    const SUBMIT_URL   = board.dataset.submitUrl;
+    const CSRF_TOKEN   = board.dataset.csrf;
+
+    const startTime = Date.now();
+
+    // FIX PROGRESS BAR WITHOUT INLINE CSS
+    const fill = document.getElementById("progressFill");
+    if (fill) {
+        const width = fill.dataset.width || 0;
+        fill.style.width = width + "%";
+    }
+
+    document.querySelectorAll(".cf-opt-btn").forEach(btn => {
+
+        btn.addEventListener("click", async function() {
+
+            if (!CONFUSION_ID) return;
+
+            const selected = this.dataset.value;
+
+            document.querySelectorAll(".cf-opt-btn")
+                .forEach(b => b.disabled = true);
+
+            const rt = (Date.now() - startTime) / 1000;
+
+            const res = await fetch(SUBMIT_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": CSRF_TOKEN
+                },
+                body: JSON.stringify({
+                    confusion_id: CONFUSION_ID,
+                    shown: SHOWN_LETTER,
+                    selected: selected,
+                    response_time: rt
+                })
+            });
+
+            const data = await res.json();
+
+            this.classList.add(data.correct ? "correct" : "wrong");
+
+            setTimeout(function() {
+
+                document.getElementById("rEmoji").textContent =
+                    data.correct ? "🎯" : "🤔";
+
+                document.getElementById("rTitle").textContent =
+                    data.correct ? "Correct!" : "Mix-up!";
+
+                document.getElementById("rSub").textContent =
+                    data.correct
+                    ? "Yes! That is the letter \"" + SHOWN_LETTER + "\""
+                    : "That was \"" + SHOWN_LETTER + "\" — watch the bump direction!";
+
+                document.getElementById("resultOverlay")
+                    .classList.remove("hidden");
+
+            }, 600);
+
+        });
+
+    });
+
+});
+</script>
+
+{% endblock %}

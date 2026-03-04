@@ -1,0 +1,386 @@
+{% extends "base.html" %} {% load static %} {% block content %}
+<link rel="stylesheet" href="{% static 'css/home_button.css' %}">
+<a href="{% url 'home' %}" class="home-btn">
+    Home
+</a>
+</div>
+<div class="menu-board">
+    <!-- ══ Header ══ -->
+    <div class="menu-header">
+        <div class="menu-header-left">
+            <h1 class="menu-title">🎮 Word Games</h1>
+            <p class="menu-sub">Choose a game and start learning!</p>
+        </div>
+    </div>
+
+    <!-- ══ Recommended banner ══ -->
+    {% if recommended_game %}
+    <div class="menu-rec">
+        ⭐ <span>Recommended for you today:</span>
+        <a href="{% url recommended_game %}" class="menu-rec-link">
+            Play {{ recommended_game|title|cut:"_" }} →
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- ══ Game cards ══ -->
+    <div class="menu-grid">
+        <!-- 1 -->
+        <a href="{% url 'sound_match' %}" class="gcard">
+            <div
+                class="gcard-icon"
+                style="background: linear-gradient(135deg, #4ca494, #2e8a7a)"
+            >
+                🔊
+            </div>
+            <div class="gcard-body">
+                <h3>Sound Match</h3>
+                <p>Hear a sound, pick the matching letter</p>
+            </div>
+            <div class="gcard-meta">
+                <span class="gcard-lvl"
+                >Level {{ sound_progress.level|default:1 }}</span>
+                <span class="gcard-play">Play ▶</span>
+            </div>
+        </a>
+
+        <!-- 2 -->
+        <a href="{% url 'word_builder' %}" class="gcard">
+            <div
+                class="gcard-icon"
+                style="background: linear-gradient(135deg, #f5ac3e, #d4841a)"
+            >
+                🧩
+            </div>
+            <div class="gcard-body">
+                <h3>Word Builder</h3>
+                <p>Drag scrambled letters into the right order</p>
+            </div>
+            <div class="gcard-meta">
+                <span class="gcard-lvl"
+                >Level {{ word_progress.level|default:1 }}</span>
+                <span class="gcard-play">Play ▶</span>
+            </div>
+        </a>
+
+        <!-- 3 -->
+        <a href="{% url 'sight_word' %}" class="gcard">
+            <div
+                class="gcard-icon"
+                style="background: linear-gradient(135deg, #9b59b6, #7a3fa0)"
+            >
+                👁️
+            </div>
+            <div class="gcard-body">
+                <h3>Sight Word Tap</h3>
+                <p>Spot the word before it disappears!</p>
+            </div>
+            <div class="gcard-meta">
+                <span class="gcard-lvl"
+                >Level {{ sight_progress.level|default:1 }}</span>
+                <span class="gcard-play">Play ▶</span>
+            </div>
+        </a>
+
+        <!-- 4 -->
+        <a href="{% url 'confusion_game' %}" class="gcard">
+            <div
+                class="gcard-icon"
+                style="background: linear-gradient(135deg, #e74c3c, #c0392b)"
+            >
+                🔤
+            </div>
+            <div class="gcard-body">
+                <h3>Letter Fix</h3>
+                <p>b or d? p or q? Fix the mix-up!</p>
+            </div>
+            <div class="gcard-meta">
+                <span class="gcard-lvl"
+                >Level {{ confusion_progress.level|default:1 }}</span>
+                <span class="gcard-play">Play ▶</span>
+            </div>
+        </a>
+
+        <!-- 5 -->
+        <a href="{% url 'syllable_game' %}" class="gcard">
+            <div
+                class="gcard-icon"
+                style="background: linear-gradient(135deg, #27ae60, #1e8449)"
+            >
+                ✂️
+            </div>
+            <div class="gcard-body">
+                <h3>Syllable Breaker</h3>
+                <p>Tap to chop words into syllables</p>
+            </div>
+            <div class="gcard-meta">
+                <span class="gcard-lvl"
+                >Level {{ syllable_progress.level|default:1 }}</span>
+                <span class="gcard-play">Play ▶</span>
+            </div>
+        </a>
+
+        <!-- 6 -->
+        <a href="{% url 'listen_type' %}" class="gcard">
+            <div
+                class="gcard-icon"
+                style="background: linear-gradient(135deg, #2980b9, #1a6fa0)"
+            >
+                🎧
+            </div>
+            <div class="gcard-body">
+                <h3>Listen &amp; Type</h3>
+                <p>Hear it — spell it — win it!</p>
+            </div>
+            <div class="gcard-meta">
+                <span class="gcard-lvl"
+                >Level {{ listen_progress.level|default:1 }}</span>
+                <span class="gcard-play">Play ▶</span>
+            </div>
+        </a>
+
+        <!-- 7 -->
+        <a href="{% url 'story_builder' %}" class="gcard">
+            <div
+                class="gcard-icon"
+                style="background: linear-gradient(135deg, #d35400, #b94600)"
+            >
+                📖
+            </div>
+            <div class="gcard-body">
+                <h3>Story Builder</h3>
+                <p>Read stories — tap words to hear them</p>
+            </div>
+            <div class="gcard-meta">
+                <span class="gcard-lvl"
+                >Level {{ story_progress.level|default:1 }}</span>
+                <span class="gcard-play">Play ▶</span>
+            </div>
+        </a>
+    </div>
+</div><!-- .menu-board -->
+
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Patrick+Hand&display=swap");
+    @import url("{% static 'css/_shared.css' %}");
+
+    /* ─── Board ─── */
+    .menu-board {
+        width: 95%;
+        max-width: 1150px;
+        background: #2c3e50;
+        border: 22px solid #b5651d;
+        border-radius: 6px;
+        box-shadow: inset 0 0 0 8px #8b4513, 0 30px 60px rgba(0, 0, 0, 0.4);
+        padding: 44px 52px 52px;
+        position: relative;
+        z-index: 5;
+    }
+
+    /* ─── Header ─── */
+    .menu-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+    .menu-title {
+        font-family: "Fredoka", sans-serif;
+        font-size: 2.3rem;
+        font-weight: 700;
+        color: rgba(240, 234, 214, 0.95);
+        letter-spacing: 2px;
+        text-shadow: 2px 3px 0 rgba(0, 0, 0, 0.45);
+        margin: 0;
+    }
+    .menu-sub {
+        font-family: "Patrick Hand", cursive;
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.42);
+        margin: 5px 0 0;
+    }
+    .menu-header-btns {
+        display: flex;
+        gap: 10px;
+        flex-shrink: 0;
+        margin-top: 4px;
+    }
+    .hdr-btn {
+        font-family: "Fredoka", sans-serif;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 9px 18px;
+        border-radius: 10px;
+        text-decoration: none;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1.5px solid rgba(255, 255, 255, 0.18);
+        color: rgba(240, 234, 214, 0.68);
+        transition: background 0.15s, color 0.15s;
+        white-space: nowrap;
+    }
+    .hdr-btn:hover {
+        background: rgba(255, 255, 255, 0.16);
+        color: white;
+    }
+    .hdr-btn-dashboard {
+        background: linear-gradient(135deg, #4ca494, #3a8a7a);
+        border-color: transparent;
+        color: white;
+        box-shadow: 0 3px 0 #2a6b5e;
+    }
+    .hdr-btn-dashboard:hover {
+        background: linear-gradient(135deg, #5db5a5, #4a9a8a);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    /* ─── Recommended ─── */
+    .menu-rec {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        background: rgba(243, 206, 87, 0.09);
+        border: 1.5px solid rgba(243, 206, 87, 0.25);
+        border-radius: 12px;
+        padding: 11px 20px;
+        margin-bottom: 26px;
+        font-family: "Patrick Hand", cursive;
+        font-size: 0.95rem;
+        color: rgba(240, 234, 214, 0.68);
+    }
+    .menu-rec-link {
+        font-family: "Fredoka", sans-serif;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #f3ce57;
+        text-decoration: underline;
+    }
+    .menu-rec-link:hover {
+        color: #ffd94a;
+    }
+
+    /* ─── Grid ─── */
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+    }
+
+    /* ─── Card ─── */
+    .gcard {
+        background: rgba(255, 255, 255, 0.07);
+        border: 1.5px solid rgba(255, 255, 255, 0.1);
+        border-radius: 18px;
+        overflow: hidden;
+        text-decoration: none;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+        transition:
+            transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+            box-shadow 0.2s,
+            background 0.18s;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+    }
+    .gcard:hover {
+        transform: translateY(-7px) scale(1.025);
+        background: rgba(255, 255, 255, 0.11);
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.32);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    .gcard:active {
+        transform: scale(0.975);
+    }
+
+    /* Icon zone */
+    .gcard-icon {
+        height: 90px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.6rem;
+        filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.3));
+    }
+
+    /* Body text */
+    .gcard-body {
+        padding: 14px 16px 10px;
+        flex: 1;
+    }
+    .gcard-body h3 {
+        font-family: "Fredoka", sans-serif;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: rgba(240, 234, 214, 0.94);
+        margin: 0 0 5px;
+    }
+    .gcard-body p {
+        font-family: "Patrick Hand", cursive;
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.5);
+        line-height: 1.4;
+        margin: 0;
+    }
+
+    /* Footer meta */
+    .gcard-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 16px 14px;
+        border-top: 1px solid rgba(255, 255, 255, 0.07);
+        margin-top: auto;
+    }
+    .gcard-lvl {
+        font-family: "Patrick Hand", cursive;
+        font-size: 0.78rem;
+        color: rgba(255, 255, 255, 0.38);
+    }
+    .gcard-play {
+        font-family: "Fredoka", sans-serif;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.25);
+        transition: color 0.18s, transform 0.18s;
+    }
+    .gcard:hover .gcard-play {
+        color: rgba(255, 255, 255, 0.85);
+        transform: translateX(3px);
+    }
+
+    /* Dashboard card slight highlight */
+    .gcard-dash {
+        border-color: rgba(127, 214, 196, 0.18);
+    }
+    .gcard-dash:hover {
+        border-color: rgba(127, 214, 196, 0.35);
+        box-shadow:
+            0 16px 36px rgba(0, 0, 0, 0.32),
+            0 0 0 1px rgba(127, 214, 196, 0.2);
+    }
+
+    /* Responsive */
+    @media (max-width: 960px) {
+        .menu-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .menu-board {
+            padding: 28px 24px 36px;
+        }
+    }
+    @media (max-width: 540px) {
+        .menu-grid {
+            grid-template-columns: 1fr;
+        }
+        .menu-title {
+            font-size: 1.8rem;
+        }
+        .menu-header {
+            flex-wrap: wrap;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="main-board game-board">
+    {% include "games/game_topbar.html" with game_title="Word Builder" game_emoji="🧩" %}
+
+
+    <div class="progress-strip">
+        <span class="ps-label">🧩 Word Builder</span>
+        <div class="ps-track"><div class="ps-fill" data-width="{{ progress.accuracy|default:0 }}"></div></div>
+        <span class="ps-badge">Level {{ progress.level|default:1 }} · {{ progress.accuracy|default:0|floatformat:0 }}%</span>
+    </div>
+
+    <div class="instruct">
+        <span class="instruct-icon">🧩</span>
+        <span>Drag the letter tiles into the correct order to build the word!</span>
+    </div>
+
+    <!-- Word image + audio -->
+    <div class="wb-top-row">
+        {% if word.image_path %}
+        <div class="wb-image-frame">
+            <img src="{{ word.image_path.url }}" alt="{{ word.word_text }}">
+        </div>
+        {% endif %}
+        {% if word.audio_file %}
+        <audio id="wordAudio" src="{{ word.audio_file.url }}" preload="auto"></audio>
+        {% endif %}
+        <button class="wb-hear-btn" onclick="playWord()" title="Hear the word">
+            🔊 <span>Hear Word</span>
+        </button>
+    </div>
+
+    <!-- Drop slots -->
+    <p class="wb-drop-label">Drop letters here:</p>
+    <div class="wb-slots" id="dropZone">
+        {% for letter in word.letters.all %}
+        <div class="wb-slot" ondragover="allowDrop(event)" ondrop="dropLetter(event, this)" data-pos="{{ forloop.counter0 }}">
+            <span class="slot-char"></span>
+            <button class="slot-remove hidden" onclick="removeFromSlot(this)">×</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Letter bank -->
+    <div class="wb-bank" id="letterBank">
+        {% for letter in shuffled %}
+        <div class="wb-tile" draggable="true"
+             data-letter="{{ letter }}"
+             ondragstart="dragStart(event)"
+             onclick="tapTile(this)">
+            {{ letter }}
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="wb-actions">
+        <button class="g-btn g-btn-teal"  onclick="checkWord()">✅ Check Answer</button>
+        <button class="g-btn g-btn-ghost" onclick="resetWord()">↩ Reset</button>
+        <button class="g-btn g-btn-ghost" data-href="{% url 'menu' %}">Menu</button>
+    </div>
+
+</div>
+
+<!-- Result -->
+<div class="result-overlay hidden" id="resultOverlay">
+    <div class="result-card">
+        <div class="r-emoji" id="rEmoji"></div>
+        <div class="r-title" id="rTitle"></div>
+        <div class="r-sub"   id="rSub"></div>
+        <div class="r-actions">
+            <button class="g-btn g-btn-teal"  onclick="location.reload()">Next Word ▶</button>
+            <button class="g-btn g-btn-amber" onclick="closeResult()">Try Again</button>
+        </div>
+    </div>
+</div>
+
+<!-- Store Django template values in data attributes -->
+<script type="application/json" id="pageData">
+{
+    "word_id": {{ word.id }},
+    "csrf_token": "{{ csrf_token }}",
+    "submit_url": "{% url 'word_builder_submit' %}"
+}
+</script>
+
+<style>
+@import url("{% static 'css/_shared.css' %}");
+
+.wb-top-row {
+    display:flex; align-items:center; justify-content:center;
+    gap:24px; margin-bottom:28px;
+}
+.wb-image-frame {
+    width:130px; height:130px; border-radius:16px;
+    background:rgba(255,255,255,0.08);
+    border:2px solid rgba(255,255,255,0.15);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.wb-image-frame img { width:100%; height:100%; object-fit:contain; padding:8px; }
+
+.wb-hear-btn {
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(255,255,255,0.1); border:2px solid rgba(255,255,255,0.25);
+    color:rgba(240,234,214,0.88); border-radius:12px; cursor:pointer;
+    font-family:'Fredoka',sans-serif; font-size:1rem; font-weight:600;
+    padding:10px 20px; transition:background 0.15s;
+}
+.wb-hear-btn:hover { background:rgba(255,255,255,0.18); }
+
+.wb-drop-label {
+    font-family:'Patrick Hand',cursive;
+    color:rgba(255,255,255,0.45); text-align:center;
+    font-size:0.95rem; margin-bottom:12px;
+}
+
+.wb-slots {
+    display:flex; justify-content:center; flex-wrap:wrap;
+    gap:10px; margin-bottom:24px; min-height:80px;
+}
+.wb-slot {
+    width:68px; height:76px; border-radius:14px;
+    border:2.5px dashed rgba(255,255,255,0.28);
+    background:rgba(255,255,255,0.05);
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+    transition:background 0.15s, border-color 0.15s;
+}
+.wb-slot.drag-over { background:rgba(127,214,196,0.2); border-color:#7fd6c4; border-style:solid; }
+.wb-slot.filled    { border-style:solid; border-color:rgba(255,255,255,0.4); }
+.wb-slot.correct   { background:rgba(76,164,148,0.45)!important; border-color:#4ca494!important; }
+.wb-slot.wrong     { background:rgba(231,76,60,0.35)!important;  border-color:#e74c3c!important; }
+.slot-char {
+    font-family:'Fredoka',sans-serif; font-size:2rem; font-weight:700;
+    color:rgba(240,234,214,0.92);
+}
+.slot-remove {
+    position:absolute; top:2px; right:4px;
+    background:none; border:none; color:rgba(255,255,255,0.4);
+    font-size:0.8rem; cursor:pointer; line-height:1;
+}
+.slot-remove:hover { color:rgba(231,76,60,0.8); }
+.slot-remove.hidden { display:none; }
+
+.wb-bank {
+    display:flex; justify-content:center; flex-wrap:wrap;
+    gap:10px; margin-bottom:28px; min-height:76px;
+}
+.wb-tile {
+    width:64px; height:72px; border-radius:14px;
+    background:linear-gradient(135deg,#f5ac3e,#d4841a);
+    color:white; font-family:'Fredoka',sans-serif;
+    font-size:1.8rem; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    cursor:grab; user-select:none;
+    box-shadow:0 5px 0 #a05a0a, 0 8px 18px rgba(0,0,0,0.2);
+    transition:transform 0.15s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s;
+}
+.wb-tile:hover  { transform:translateY(-5px) scale(1.08); }
+.wb-tile:active { cursor:grabbing; transform:scale(0.95); }
+.wb-tile.used   { opacity:0.25; pointer-events:none; }
+
+.wb-actions { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
+</style>
+
+<script>
+// Apply width from data attribute and set up menu buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const fill = document.querySelector('.ps-fill[data-width]');
+    if (fill) {
+        fill.style.width = fill.dataset.width + '%';
+    }
+    // Set up menu button
+    const menuBtn = document.querySelector('button[data-href]');
+    if (menuBtn) {
+        menuBtn.addEventListener('click', function() {
+            window.location = this.dataset.href;
+        });
+    }
+});
+</script>
+
+<script>
+// Load data from JSON script block
+const pageDataEl = document.getElementById('pageData');
+const pageData = JSON.parse(pageDataEl.textContent);
+const WORD_ID    = pageData.word_id;
+const CSRF_TOKEN = pageData.csrf_token;
+const SUBMIT_URL = pageData.submit_url;
+let draggedTile  = null;
+let lastTapped   = null;
+const startTime  = Date.now();
+
+/* ─── Drag & Drop ─── */
+function dragStart(e) {
+    draggedTile = e.target;
+    e.dataTransfer.setData('text', e.target.dataset.letter);
+    setTimeout(() => e.target.style.opacity = '0.35', 0);
+}
+document.addEventListener('dragend', e => { if(e.target.classList.contains('wb-tile')) e.target.style.opacity = ''; });
+
+function allowDrop(e) {
+    e.preventDefault();
+    e.currentTarget.classList.add('drag-over');
+}
+document.querySelectorAll && document.addEventListener('dragleave', e => {
+    if(e.target.classList && e.target.classList.contains('wb-slot'))
+        e.target.classList.remove('drag-over');
+});
+
+function dropLetter(e, slot) {
+    e.preventDefault();
+    slot.classList.remove('drag-over');
+    if (slot.querySelector('.slot-char').textContent) return; // already filled
+    const letter = e.dataTransfer.getData('text');
+    if (!letter && !draggedTile) return;
+    const selector = '[data-letter="' + letter + '"]:not(.used)';
+    fillSlot(slot, draggedTile || document.querySelector(selector));
+    draggedTile = null;
+}
+
+/* ─── Tap to place (mobile-friendly) ─── */
+function tapTile(tile) {
+    if (tile.classList.contains('used')) return;
+    const firstEmpty = Array.from(document.querySelectorAll('.wb-slot'))
+        .find(s => !s.querySelector('.slot-char').textContent);
+    if (firstEmpty) fillSlot(firstEmpty, tile);
+}
+
+function fillSlot(slot, tile) {
+    slot.querySelector('.slot-char').textContent = tile.dataset.letter;
+    slot.querySelector('.slot-remove').classList.remove('hidden');
+    slot.classList.add('filled');
+    slot.dataset.tileRef = tile.dataset.letter;
+    tile.classList.add('used');
+}
+
+function removeFromSlot(btn) {
+    const slot   = btn.closest('.wb-slot');
+    const letter = slot.querySelector('.slot-char').textContent;
+    slot.querySelector('.slot-char').textContent = '';
+    slot.querySelector('.slot-remove').classList.add('hidden');
+    slot.classList.remove('filled','correct','wrong');
+    // Re-enable matching tile
+    const tile = Array.from(document.querySelectorAll('.wb-tile.used'))
+        .find(t => t.dataset.letter === letter);
+    if (tile) tile.classList.remove('used');
+}
+
+function resetWord() {
+    document.querySelectorAll('.wb-slot').forEach(s => {
+        s.querySelector('.slot-char').textContent = '';
+        s.querySelector('.slot-remove').classList.add('hidden');
+        s.classList.remove('filled','correct','wrong','drag-over');
+    });
+    document.querySelectorAll('.wb-tile').forEach(t => { t.classList.remove('used'); t.style.opacity = ''; });
+}
+
+async function checkWord() {
+    const slots = Array.from(document.querySelectorAll('.wb-slot'));
+    const submitted = slots.map(s => s.querySelector('.slot-char').textContent.trim());
+    if (submitted.some(l => !l)) {
+        shakeMissing(slots); return;
+    }
+    const rt  = (Date.now() - startTime) / 1000;
+    const res = await fetch(SUBMIT_URL, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-CSRFToken':CSRF_TOKEN},
+        body: JSON.stringify({ word_id: WORD_ID, submitted_order: submitted, response_time: rt })
+    });
+    const data = await res.json();
+
+    slots.forEach((slot, i) => {
+        slot.classList.add(submitted[i] === data.correct_order[i] ? 'correct' : 'wrong');
+    });
+
+    if (data.correct) {
+        playWord();
+        const audio2 = new Audio(); audio2.src=''; // placeholder success sound
+        showStars();
+    }
+
+    setTimeout(() => {
+        document.getElementById('rEmoji').textContent = data.correct ? '🎉' : '💪';
+        document.getElementById('rTitle').textContent = data.correct ? 'Perfect Spelling!' : 'Not quite!';
+        document.getElementById('rSub').textContent   = data.correct
+            ? 'You built it perfectly!'
+            : 'Correct order: ' + data.correct_order.join(' · ');
+        document.getElementById('resultOverlay').classList.remove('hidden');
+    }, 900);
+}
+
+function shakeMissing(slots) {
+    slots.forEach(s => {
+        if (!s.querySelector('.slot-char').textContent)
+            s.style.animation = 'shake 0.4s ease';
+    });
+    setTimeout(() => slots.forEach(s => s.style.animation = ''), 500);
+}
+
+function showStars() {
+    const stars = ['⭐','🌟','✨'];
+    stars.forEach((s, i) => {
+        const el = document.createElement('div');
+        el.textContent = s; el.className = 'floating-star';
+        el.style.cssText = `position:fixed;font-size:2.5rem;top:${30+i*8}%;left:${20+i*30}%;
+            animation:starFloat 1.2s ease forwards;pointer-events:none;z-index:99999;`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1400);
+    });
+}
+
+function closeResult() {
+    document.getElementById('resultOverlay').classList.add('hidden');
+    resetWord();
+}
+
+function playWord() {
+    const a = document.getElementById('wordAudio');
+    if (a) { a.currentTime=0; a.play(); }
+}
+
+// Add star animation
+const style = document.createElement('style');
+style.textContent = `
+@keyframes starFloat {
+    from { transform:translateY(0) scale(0); opacity:1; }
+    to   { transform:translateY(-120px) scale(1.5); opacity:0; }
+}
+@keyframes shake {
+    0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)}
+}`;
+document.head.appendChild(style);
+</script>
+{% endblock %}
