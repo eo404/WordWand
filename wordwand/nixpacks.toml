@@ -1,2 +1,11 @@
 [phases.setup]
-nixPkgs = ["tesseract"]
+nixPkgs = ["python311", "tesseract"]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt"]
+
+[phases.build]
+cmds = ["python manage.py collectstatic --noinput"]
+
+[start]
+cmd = "python manage.py migrate && gunicorn wordwand.wsgi --log-file -"
