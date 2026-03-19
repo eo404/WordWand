@@ -100,7 +100,8 @@ def extract_text_from_file(file_path, file_ext):
     text = ""
 
     if file_ext in {"png", "jpg", "jpeg", "bmp", "tiff"}:
-        pytesseract.pytesseract.tesseract_cmd = settings.TESSERACT_CMD
+        if os.name == "nt" and settings.TESSERACT_CMD:
+            pytesseract.pytesseract.tesseract_cmd = settings.TESSERACT_CMD
         img = cv2.imread(file_path)
         if img is None:
             raise ValueError("Could not read image file.")
