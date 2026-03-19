@@ -110,9 +110,13 @@ LOGOUT_REDIRECT_URL = 'login'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL'),
-        conn_max_age=600,
-        ssl_require=True,
-    )
+    'default': {
+        'ENGINE':   os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME':     os.getenv('DB_NAME',     'neondb'),
+        'USER':     os.getenv('DB_USER',     ''),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST':     os.getenv('DB_HOST',     ''),
+        'PORT':     os.getenv('DB_PORT',     '5432'),
+        'OPTIONS':  {'sslmode': 'require'},
+    }
 }
