@@ -14,6 +14,10 @@ SECRET_KEY = os.getenv(
     'DJANGO_SECRET_KEY', 'django-insecure-yd3u)o_jjb&=%j*e%3(3%7%^#*pw^m#f^cb8d&s#*88@8eag&z')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
+CSRF_TRUSTED_ORIGINS = [
+    'https://wordwand-production.up.railway.app',
+    'http://127.0.0.1:8000',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
