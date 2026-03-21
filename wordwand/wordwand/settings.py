@@ -10,17 +10,10 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR.parent / ".env")
 
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-yd3u)o_jjb&=%j*e%3(3%7%^#*pw^m#f^cb8d&s#*88@8eag&z')
-
-# SECURITY WARNING: don't run with debug turned on in production!
+SECRET_KEY = os.getenv(
+    'DJANGO_SECRET_KEY', 'django-insecure-yd3u)o_jjb&=%j*e%3(3%7%^#*pw^m#f^cb8d&s#*88@8eag&z')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
-
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
-
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -39,7 +32,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',   
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -67,56 +60,67 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'wordwand.wsgi.application'
 
-
-
-
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-    
 ]
 
-
-# Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Tesseract OCR — set via .env so it works cross-platform
 TESSERACT_CMD = os.getenv('TESSERACT_CMD', None)
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-# Password Reset Token Expiration — 24 hours
 PASSWORD_RESET_TIMEOUT = 86400
-
-# Auth redirects
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-DATABASES = {
-    'default': {
-        'ENGINE':   os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
-        'NAME':     os.getenv('DB_NAME',     'neondb'),
-        'USER':     os.getenv('DB_USER',     ''),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST':     os.getenv('DB_HOST',     ''),
-        'PORT':     os.getenv('DB_PORT',     '5432'),
-        'OPTIONS':  {'sslmode': 'require'},
+# ── DATABASE ──────────────────────────────────────────────────────────────────
+# Priority 1: DATABASE_URL (single connection string — preferred for Railway)
+# Priority 2: Individual DB_* variables
+# Priority 3: SQLite for local development
+
+DATABASE_URL = os.getenv('DATABASE_URL')
+DB_HOST = os.getenv('DB_HOST', '')
+
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True,
+        )
     }
-}
+elif DB_HOST:
+    DATABASES = {
+        'default': {
+            'ENGINE':   os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
+            'NAME':     os.getenv('DB_NAME',   'neondb'),
+            'USER':     os.getenv('DB_USER',   ''),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''),
+            'HOST':     DB_HOST,
+            'PORT':     os.getenv('DB_PORT',   '5432'),
+            'OPTIONS':  {'sslmode': 'require'},
+        }
+    }
+else:
+    # Local development fallback — SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
