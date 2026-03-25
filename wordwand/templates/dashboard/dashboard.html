@@ -46,8 +46,8 @@
         <header class="topbar">
           <div>
             <h1 id="greeting-message">
-              Good {{ time_greeting }}, {{ user.first_name|default:user.username
-              }} 👋
+              Good {{ time_greeting }}, {% firstof user.first_name user.username
+              %} 👋
             </h1>
             <p>Here's what's happening with your learning today.</p>
           </div>
