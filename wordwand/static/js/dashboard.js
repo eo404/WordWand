@@ -1,5 +1,46 @@
+function parseJsonScript(id, fallback) {
+  const node = document.getElementById(id);
+  if (!node) return fallback;
+
+  try {
+    return JSON.parse(node.textContent);
+  } catch (error) {
+    return fallback;
+  }
+}
+
+function getHeatmapColor(hours, maxHours) {
+  const normalizedMax = maxHours > 0 ? maxHours : 1;
+  const intensity = hours / normalizedMax;
+
+  if (hours === 0) return "#E8E3FF";
+  if (intensity < 0.25) return "#C4B5FD";
+  if (intensity < 0.5) return "#A78BFA";
+  if (intensity < 0.75) return "#8B6FE8";
+  return "#5B3FBF";
+}
+
+const heatmapData = parseJsonScript("heatmap-data", []);
+const maxHours = parseJsonScript("max-hours", 1);
+const chartCoursesRaw = parseJsonScript("chart-courses-data", {});
+const days = parseJsonScript("days-data", ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]);
+const completedPct = parseJsonScript("completed-pct-data", 0);
+const inProgressPct = parseJsonScript("inprogress-pct-data", 0);
+
+// Heatmap
+const heatmapContainer = document.getElementById("heatmap");
+if (heatmapContainer && Array.isArray(heatmapData)) {
+  heatmapData.forEach((day) => {
+    const cell = document.createElement("div");
+    cell.classList.add("heatmap-cell");
+    cell.style.backgroundColor = getHeatmapColor(day.hours, maxHours);
+    cell.title = `${day.date} - ${day.hours} hours`;
+    heatmapContainer.appendChild(cell);
+  });
+}
+
 // Hours Chart
-if (typeof chartCoursesRaw !== "undefined" && Object.keys(chartCoursesRaw).length > 0) {
+if (Object.keys(chartCoursesRaw).length > 0) {
 
   const colors = ['#8B6FE8', '#C4B5FD', '#5B3FBF', '#A78BFA'];
 
@@ -87,8 +128,8 @@ if (typeof chartCoursesRaw !== "undefined" && Object.keys(chartCoursesRaw).lengt
 const progressCtx = document.getElementById('progressChart');
 if (progressCtx) {
   // Ensure percentages are valid numbers
-  const completed = typeof completedPct !== 'undefined' && !isNaN(completedPct) ? completedPct : 0;
-  const inProgress = typeof inProgressPct !== 'undefined' && !isNaN(inProgressPct) ? inProgressPct : 0;
+  const completed = !isNaN(completedPct) ? completedPct : 0;
+  const inProgress = !isNaN(inProgressPct) ? inProgressPct : 0;
 
   // If both are 0 (no courses), show empty state (all gray)
   const data = (completed === 0 && inProgress === 0) ? [100] : [completed, inProgress];

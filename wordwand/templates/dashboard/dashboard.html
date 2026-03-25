@@ -1,142 +1,118 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — WordWand</title>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard — WordWand</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}?v=3">
+    <script
+      src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"
+    ></script>
+  </head>
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}?v=3">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-</head>
-<script>
-  const heatmapData = JSON.parse(document.getElementById("heatmap-data").textContent);
-  const maxHours = JSON.parse(document.getElementById("max-hours").textContent);
-
-  const container = document.getElementById("heatmap");
-
-  function getColor(hours) {
-    const intensity = hours / maxHours;
-    if (hours === 0) return "#E8E3FF";
-    if (intensity < 0.25) return "#C4B5FD";
-    if (intensity < 0.5) return "#A78BFA";
-    if (intensity < 0.75) return "#8B6FE8";
-    return "#5B3FBF";
-  }
-
-  heatmapData.forEach(day => {
-    const cell = document.createElement("div");
-    cell.classList.add("heatmap-cell");
-    cell.style.backgroundColor = getColor(day.hours);
-    cell.title = `${day.date} — ${day.hours} hours`;
-    container.appendChild(cell);
-  });
-</script>
-
-<body>
-
-  <div class="layout">
-
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-logo">
-        <span class="logo-text">WordWand</span>
-      </div>
-
-      <nav class="nav">
-        <div class="nav-label">Main</div>
-        <a href="{% url 'dashboard' %}" class="nav-item active">Overview</a>
-        <a href="{% url 'home' %}" class="nav-item">Home</a>
-
-        <div class="nav-label mt">Account</div>
-        <a href="{% url 'profile' %}?next={% url 'dashboard' %}" class="nav-item">Profile</a>
-
-        <form method="POST" action="{% url 'logout' %}" class="logout-form">
-          <button type="submit" class="nav-item">Log Out</button>
-        </form>
-      </nav>
-    </aside>
-
-    <!-- Main -->
-    <div class="main">
-
-      <header class="topbar">
-        <div>
-          <h1 id="greeting-message">
-            Good {{ time_greeting }}, {{ user.first_name|default:user.username }} 👋
-          </h1>
-          <p>Here's what's happening with your learning today.</p>
+  <body>
+    <div class="layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <span class="logo-text">WordWand</span>
         </div>
-      </header>
 
-      <!-- Content Wrapper -->
-      <div class="content">
+        <nav class="nav">
+          <div class="nav-label">Main</div>
+          <a href="{% url 'dashboard' %}" class="nav-item active">Overview</a>
+          <a href="{% url 'home' %}" class="nav-item">Home</a>
 
-        <!-- FULL WIDTH GRID -->
-        <div class="dashboard-grid">
+          <div class="nav-label mt">Account</div>
+          <a
+            href="{% url 'profile' %}?next={% url 'dashboard' %}"
+            class="nav-item"
+          >Profile</a>
 
-          <!-- Hours Card -->
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">Learning Activity (Last 12 Months)</span>
-            </div>
-          
-            <div class="heatmap-container" id="heatmap"></div>
+          <form method="POST" action="{% url 'logout' %}" class="logout-form">
+            <button type="submit" class="nav-item">Log Out</button>
+          </form>
+        </nav>
+      </aside>
+
+      <!-- Main -->
+      <div class="main">
+        <header class="topbar">
+          <div>
+            <h1 id="greeting-message">
+              Good {{ time_greeting }}, {{ user.first_name|default:user.username
+              }} 👋
+            </h1>
+            <p>Here's what's happening with your learning today.</p>
           </div>
-          
-          {{ heatmap_data|json_script:"heatmap-data" }}
-          {{ max_hours|json_script:"max-hours" }}
-          <!-- Progress Card -->
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">Course Progress</span>
+        </header>
+
+        <!-- Content Wrapper -->
+        <div class="content">
+          <!-- FULL WIDTH GRID -->
+          <div class="dashboard-grid">
+            <!-- Hours Card -->
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title"
+                >Learning Activity (Last 12 Months)</span>
+              </div>
+
+              <div class="heatmap-container" id="heatmap"></div>
             </div>
-            <div class="card-body">
-              <div class="donut-wrap">
-                <canvas id="progressChart"></canvas>
-                <div class="donut-label">
-                  {% if user_courses|length > 0 %}
-                  <span class="pct">{{ completed_pct }}%</span>
-                  <span class="sub">Complete</span>
-                  {% else %}
-                  <span class="pct">—</span>
-                  <span class="sub">No Courses</span>
-                  {% endif %}
+
+            {{ heatmap_data|json_script:"heatmap-data" }} {{
+            max_hours|json_script:"max-hours" }}
+            <!-- Progress Card -->
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">Course Progress</span>
+              </div>
+              <div class="card-body">
+                <div class="donut-wrap">
+                  <canvas id="progressChart"></canvas>
+                  <div class="donut-label">
+                    {% if user_courses|length > 0 %}
+                    <span class="pct">{{ completed_pct }}%</span>
+                    <span class="sub">Complete</span>
+                    {% else %}
+                    <span class="pct">—</span>
+                    <span class="sub">No Courses</span>
+                    {% endif %}
+                  </div>
                 </div>
-              </div>
 
-              {% if user_courses|length > 0 %}
-              <div class="donut-summary">
-                <span class="summary-item">
-                  <span class="dot" style="background: #5B3FBF;"></span>
-                  {{ completed }} Completed
-                </span>
-                <span class="summary-item">
-                  <span class="dot" style="background: #C4B5FD;"></span>
-                  {{ in_progress }} In Progress
-                </span>
+                {% if user_courses|length > 0 %}
+                <div class="donut-summary">
+                  <span class="summary-item">
+                    <span class="dot" style="background: #5b3fbf"></span>
+                    {{ completed_count }} Completed
+                  </span>
+                  <span class="summary-item">
+                    <span class="dot" style="background: #c4b5fd"></span>
+                    {{ in_progress_count }} In Progress
+                  </span>
+                </div>
+                {% endif %}
               </div>
-              {% endif %}
             </div>
           </div>
-
         </div>
       </div>
     </div>
-  </div>
 
-  {{ chart_courses|json_script:"chart-courses-data" }}
-  {{ days|json_script:"days-data" }}
-  {{ completed_pct|json_script:"completed-pct-data" }}
-  {{ in_progress_pct|json_script:"inprogress-pct-data" }}
-  {{ time_greeting|json_script:"time-greeting-data" }}
+    {{ chart_courses|json_script:"chart-courses-data" }} {{
+    days|json_script:"days-data" }} {{
+    completed_pct|json_script:"completed-pct-data" }} {{
+    in_progress_pct|json_script:"inprogress-pct-data" }} {{
+    time_greeting|json_script:"time-greeting-data" }}
 
-  <script src="{% static 'js/dashboard.js' %}"></script>
-
-</body>
-
+    <script src="{% static 'js/dashboard.js' %}"></script>
+  </body>
 </html>
