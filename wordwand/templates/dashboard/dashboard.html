@@ -45,9 +45,9 @@
       <div class="main">
         <header class="topbar">
           <div>
+            {% firstof user.first_name user.username as display_name %}
             <h1 id="greeting-message">
-              Good {{ time_greeting }}, {% firstof user.first_name user.username
-              %} 👋
+              Good {{ time_greeting }}, {{ display_name }} 👋
             </h1>
             <p>Here's what's happening with your learning today.</p>
           </div>
@@ -67,8 +67,8 @@
               <div class="heatmap-container" id="heatmap"></div>
             </div>
 
-            {{ heatmap_data|json_script:"heatmap-data" }} {{
-            max_hours|json_script:"max-hours" }}
+            <script id="heatmap-data" type="application/json">{{ heatmap_data_json|safe }}</script>
+            <script id="max-hours" type="application/json">{{ max_hours_json|safe }}</script>
             <!-- Progress Card -->
             <div class="card">
               <div class="card-header">
@@ -107,11 +107,11 @@
       </div>
     </div>
 
-    {{ chart_courses|json_script:"chart-courses-data" }} {{
-    days|json_script:"days-data" }} {{
-    completed_pct|json_script:"completed-pct-data" }} {{
-    in_progress_pct|json_script:"inprogress-pct-data" }} {{
-    time_greeting|json_script:"time-greeting-data" }}
+    <script id="chart-courses-data" type="application/json">{{ chart_courses_json|safe }}</script>
+    <script id="days-data" type="application/json">{{ days_json|safe }}</script>
+    <script id="completed-pct-data" type="application/json">{{ completed_pct_json|safe }}</script>
+    <script id="inprogress-pct-data" type="application/json">{{ in_progress_pct_json|safe }}</script>
+    <script id="time-greeting-data" type="application/json">{{ time_greeting_json|safe }}</script>
 
     <script src="{% static 'js/dashboard.js' %}"></script>
   </body>

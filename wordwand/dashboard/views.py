@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import date, datetime, timedelta
+import json
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.shortcuts import render
@@ -33,7 +34,8 @@ def dashboard_view(request):
     )
     activity_map = defaultdict(float)
     for entry in activities:
-        actual_date = entry['week_start'] + timedelta(days=entry['day_of_week'])
+        actual_date = entry['week_start'] + \
+            timedelta(days=entry['day_of_week'])
         activity_map[actual_date] += float(entry['total_hours'])
 
     heatmap_data = []
@@ -41,7 +43,8 @@ def dashboard_view(request):
     max_hours = 0
     while current_date <= today:
         hours = activity_map.get(current_date, 0)
-        heatmap_data.append({"date": current_date.strftime("%Y-%m-%d"), "hours": round(hours, 2)})
+        heatmap_data.append({"date": current_date.strftime(
+            "%Y-%m-%d"), "hours": round(hours, 2)})
         max_hours = max(max_hours, hours)
         current_date += timedelta(days=1)
 
@@ -55,16 +58,20 @@ def dashboard_view(request):
     )
     chart_courses = defaultdict(lambda: [0.0] * 7)
     for row in weekly_qs:
-        chart_courses[row['course__title']][row['day_of_week']] += float(row['total'])
+        chart_courses[row['course__title']
+                      ][row['day_of_week']] += float(row['total'])
 
     # Donut chart
-    user_courses = UserCourse.objects.filter(user=user).select_related('course')
+    user_courses = UserCourse.objects.filter(
+        user=user).select_related('course')
     total_courses = user_courses.count()
     completed_count = user_courses.filter(is_completed=True).count()
     in_progress_count = user_courses.filter(is_completed=False).count()
 
-    completed_pct = int((completed_count / total_courses) * 100) if total_courses > 0 else 0
-    in_progress_pct = int((in_progress_count / total_courses) * 100) if total_courses > 0 else 0
+    completed_pct = int((completed_count / total_courses)
+                        * 100) if total_courses > 0 else 0
+    in_progress_pct = int((in_progress_count / total_courses)
+                          * 100) if total_courses > 0 else 0
 
     # Scheduled classes
     scheduled_classes = (
@@ -97,6 +104,13 @@ def dashboard_view(request):
         "total_hours_spent": round(sum(uc.hours_spent for uc in user_courses), 1),
         "scheduled_classes": scheduled_classes,
         "assignments": assignments,
+        "heatmap_data_json": json.dumps(heatmap_data),
+        "max_hours_json": json.dumps(max_hours if max_hours > 0 else 1),
+        "chart_courses_json": json.dumps(dict(chart_courses)),
+        "days_json": json.dumps(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']),
+        "completed_pct_json": json.dumps(completed_pct),
+        "in_progress_pct_json": json.dumps(in_progress_pct),
+        "time_greeting_json": json.dumps(time_greeting),
     }
 
     return render(request, "dashboard/dashboard.html", context)
